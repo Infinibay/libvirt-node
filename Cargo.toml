@@ -1,0 +1,21 @@
+[package]
+authors = ["Andres Jose Borek <andres.b.dev@gmail.com>"]
+edition = "2021"
+name    = "libvirt-node-rs"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi        = "2"
+napi-derive = "2"
+virt        = "0.31"
+
+[build-dependencies]
+napi-build = "2"
+
+[profile.release]
+lto = true
