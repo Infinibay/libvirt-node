@@ -12,7 +12,7 @@ crate-type = ["cdylib"]
 [dependencies]
 napi        = "2"
 napi-derive = "2"
-virt        = "0.31"
+virt        = "0.3.1"
 
 [build-dependencies]
 napi-build = "2"

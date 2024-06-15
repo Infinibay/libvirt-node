@@ -1,6 +1,7 @@
 use napi_derive::napi;
-use virt::{Connect, Domain, DomainGraphicsType, DomainModify};
+use virt::{Connect, Domain, DomainGraphicsType, DomainModify, DomainXmlFlags};
 use std::sync::Mutex;
+use xml::reader::{EventReader, XmlEvent};
 
 #[napi]
 pub struct Machine {
@@ -83,11 +84,11 @@ impl Machine {
         }
     }
 
-		#[napi]
+    #[napi]
     pub fn get_vnc_port(&self) -> Result<u32, napi::Error> {
         let domain = self.domain.lock().unwrap();
         if let Some(ref dom) = *domain {
-            let xml_desc = dom.get_xml_desc(virt::DomainXmlFlags::empty())
+            let xml_desc = dom.get_xml_desc(DomainXmlFlags::empty())
                 .map_err(|e| napi::Error::new(napi::Status::GenericFailure, format!("Failed to get domain XML: {}", e)))?;
             parse_graphics_port(&xml_desc, "vnc")
         } else {
@@ -99,7 +100,7 @@ impl Machine {
     pub fn get_spice_port(&self) -> Result<u32, napi::Error> {
         let domain = self.domain.lock().unwrap();
         if let Some(ref dom) = *domain {
-            let xml_desc = dom.get_xml_desc(virt::DomainXmlFlags::empty())
+            let xml_desc = dom.get_xml_desc(DomainXmlFlags::empty())
                 .map_err(|e| napi::Error::new(napi::Status::GenericFailure, format!("Failed to get domain XML: {}", e)))?;
             parse_graphics_port(&xml_desc, "spice")
         } else {
@@ -107,9 +108,7 @@ impl Machine {
         }
     }
 
-    // Helper function to parse XML and extract the port
     fn parse_graphics_port(xml_desc: &str, graphics_type: &str) -> Result<u32, napi::Error> {
-        use xml::reader::{EventReader, XmlEvent};
         let parser = EventReader::from_str(xml_desc);
         let mut in_graphics = false;
         for e in parser {
@@ -162,8 +161,7 @@ impl Machine {
         }
     }
 
-    // Additional methods for TPM2, setting RAM, CPUs, disk space, getting hardware info, configuring with raw XML, and getting raw XML can be added here.
-		#[napi]
+    #[napi]
     pub fn add_tpm2(&self, tpm_model: String, tpm_type: String) -> Result<(), napi::Error> {
         let mut domain = self.domain.lock().unwrap();
         if let Some(ref mut dom) = *domain {
