@@ -13,6 +13,10 @@ crate-type = ["cdylib"]
 napi        = "2"
 napi-derive = "2"
 virt        = "0.3.1"
+thiserror   = "1.0.30"
+anyhow      = "1.0.55"
+serde       = { version = "1.0", features = ["derive"] }
+log         = "0.4.14" # Added for logging purposes
 
 [build-dependencies]
 napi-build = "2"
