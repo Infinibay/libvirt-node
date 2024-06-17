@@ -3,7 +3,7 @@ use anyhow::{Result, anyhow};
 use thiserror::Error;
 use log::{info, error, warn};
 use napi_derive::napi;
-use napi::{ToNapiValue, FromNapiValue, FromNapiRef, Env, JsUnknown};
+use napi::bindgen_prelude::{ToNapiValue, FromNapiValue, FromNapiRef};
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -28,7 +28,7 @@ pub struct Connection {
 
 impl Clone for Connect {
     fn clone(&self) -> Self {
-        Connect::open(self.get_uri().unwrap_or("")).unwrap()
+        Connect::open(self.get_uri().unwrap_or("").to_string()).unwrap()
     }
 }
 
@@ -111,7 +111,7 @@ impl Connection {
                     Ok(domain) => Ok(domain),
                     Err(e) => {
                         error!("Failed to define domain from XML: {}", e);
-                        Err(ConnectionError::DomainDefineError(e.to_string()))
+                        Err(ConnectionError::DomainDefineError(e.to_string())))
                     }
                 }
             },
@@ -134,7 +134,7 @@ impl Connection {
                     Ok(domain) => Ok(domain),
                     Err(e) => {
                         error!("Failed to find domain by name {}: {}", name, e);
-                        Err(ConnectionError::DomainNotFoundError(e.to_string()))
+                        Err(ConnectionError::DomainNotFoundError(e.to_string())))
                     }
                 }
             },
@@ -157,7 +157,7 @@ impl Connection {
                     Ok(domains) => Ok(domains),
                     Err(e) => {
                         error!("Failed to list domains: {}", e);
-                        Err(ConnectionError::DomainListError(e.to_string()))
+                        Err(ConnectionError::DomainListError(e.to_string())))
                     }
                 }
             },
@@ -177,7 +177,7 @@ impl Connection {
 impl napi::bindgen_prelude::ToNapiValue for Option<Connect> {
     unsafe fn to_napi_value(env: napi::sys::napi_env, val: Self) -> napi::Result<napi::sys::napi_value> {
         match val {
-            Some(conn) => napi::JsString::from_str(env, &conn.get_uri().unwrap_or("")).map(|js_str| js_str.raw()),
+            Some(conn) => napi::JsString::from(env, &conn.get_uri().unwrap_or_default()).map(|js_str| js_str.raw()),
             None => napi::JsObject::new(env).map(|js_obj| js_obj.raw()),
         }
     }
