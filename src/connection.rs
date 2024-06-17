@@ -3,6 +3,7 @@ use anyhow::{Result, anyhow};
 use thiserror::Error;
 use log::{info, error, warn};
 use napi_derive::napi;
+use napi::{ToNapiValue, FromNapiValue, FromNapiRef, Env, JsUnknown};
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -23,6 +24,12 @@ pub enum ConnectionError {
 #[napi]
 pub struct Connection {
     pub conn: Option<Connect>, // Change visibility to pub
+}
+
+impl Clone for Connect {
+    fn clone(&self) -> Self {
+        Connect::open(self.get_uri().unwrap_or("")).unwrap()
+    }
 }
 
 #[napi]
@@ -163,6 +170,32 @@ impl Connection {
 
     pub fn get_conn(&self) -> Option<&Connect> {
         self.conn.as_ref()
+    }
+}
+
+// Implement ToNapiValue and FromNapiValue for Option<Connect>
+impl napi::bindgen_prelude::ToNapiValue for Option<Connect> {
+    unsafe fn to_napi_value(env: napi::sys::napi_env, val: Self) -> napi::Result<napi::sys::napi_value> {
+        match val {
+            Some(conn) => napi::JsString::from_str(env, &conn.get_uri().unwrap_or("")).map(|js_str| js_str.raw()),
+            None => napi::JsObject::new(env).map(|js_obj| js_obj.raw()),
+        }
+    }
+}
+
+impl napi::bindgen_prelude::FromNapiValue for Option<Connect> {
+    unsafe fn from_napi_value(env: napi::sys::napi_env, napi_val: napi::sys::napi_value) -> napi::Result<Self> {
+        let js_str = napi::JsString::from_napi_value(env, napi_val)?;
+        let uri = js_str.into_utf8()?.as_str()?.to_string();
+        Ok(Some(Connect::open(&uri).map_err(|e| napi::Error::from_reason(format!("Failed to open connection: {:?}", e)))?))
+    }
+}
+
+// Implement FromNapiRef for &str
+impl napi::bindgen_prelude::FromNapiRef for &str {
+    fn from_napi_ref(env: napi::sys::napi_env, napi_val: napi::sys::napi_value) -> napi::Result<Self> {
+        let js_str = napi::JsString::from_napi_value(env, napi_val)?;
+        Ok(js_str.into_utf8()?.as_str()?)
     }
 }
 

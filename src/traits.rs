@@ -35,4 +35,40 @@ impl napi::bindgen_prelude::FromNapiRef for Connection {
         let conn_str = js_string.into_utf8()?.as_str()?.to_string();
         Connection::new(Some(&conn_str)).map_err(|e| napi::Error::from_reason(format!("Failed to create connection: {:?}", e)))
     }
+
+// Implement ToNapiValue for Domain
+impl napi::bindgen_prelude::ToNapiValue for Domain {
+    unsafe fn to_napi_value(env: napi::sys::napi_env, val: Self) -> NapiResult<napi::sys::napi_value> {
+        let domain_name = val.get_name().map_err(|e| napi::Error::from_reason(format!("Failed to get domain name: {:?}", e)))?;
+        napi::JsString::from_str(env, &domain_name).map(|js_str| js_str.raw())
+    }
 }
+
+// Implement FromNapiValue for Option<Connect>
+impl napi::bindgen_prelude::FromNapiValue for Option<Connect> {
+    unsafe fn from_napi_value(env: napi::sys::napi_env, napi_val: napi::sys::napi_value) -> NapiResult<Self> {
+        let js_str = napi::JsString::from_napi_value(env, napi_val)?;
+        let uri = js_str.into_utf8()?.as_str()?.to_string();
+        Ok(Some(Connect::open(&uri).map_err(|e| napi::Error::from_reason(format!("Failed to open connection: {:?}", e)))?))
+    }
+}
+
+// Implement ToNapiValue for Option<Connect>
+impl napi::bindgen_prelude::ToNapiValue for Option<Connect> {
+    unsafe fn to_napi_value(env: napi::sys::napi_env, val: Self) -> NapiResult<napi::sys::napi_value> {
+        match val {
+            Some(conn) => napi::JsString::from_str(env, &conn.get_uri().unwrap_or("")).map(|js_str| js_str.raw()),
+            None => napi::JsObject::new(env).map(|js_obj| js_obj.raw()),
+        }
+    }
+}
+
+// Implement FromNapiRef for &str
+impl napi::bindgen_prelude::FromNapiRef for &str {
+    fn from_napi_ref(env: napi::sys::napi_env, napi_val: napi::sys::napi_value) -> NapiResult<Self> {
+        let js_str = napi::JsString::from_napi_value(env, napi_val)?;
+        Ok(js_str.into_utf8()?.as_str()?)
+    }
+}
+```
+------------------------end_of_format---------------------------
