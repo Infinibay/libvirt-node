@@ -13,6 +13,10 @@ pub enum ConnectionError {
     DomainDefineError(String),
     #[error("Operation attempted on a disconnected instance")]
     DisconnectedInstanceError,
+    #[error("Failed to find domain: {0}")]
+    DomainNotFoundError(String),
+    #[error("Failed to list domains: {0}")]
+    DomainListError(String),
 }
 
 pub struct Connection {
@@ -70,8 +74,6 @@ impl Connection {
         }
     }
 
-    // Updated to reflect the correct usage of the virt crate's capabilities
-    // Assuming the virt crate's documentation provided an alternative method or the correct method name
     pub fn define_domain_from_xml(&self, xml_desc: &str) -> Result<Domain, ConnectionError> {
         match &self.conn {
             Some(conn) => {
@@ -85,6 +87,42 @@ impl Connection {
             },
             None => {
                 warn!("Attempted to define a domain without an active connection.");
+                Err(ConnectionError::DisconnectedInstanceError)
+            }
+        }
+    }
+
+    pub fn find_machine(&self, name: &str) -> Result<Domain, ConnectionError> {
+        match &self.conn {
+            Some(conn) => {
+                match Domain::lookup_by_name(&conn, name) {
+                    Ok(domain) => Ok(domain),
+                    Err(e) => {
+                        error!("Failed to find domain by name {}: {}", name, e);
+                        Err(ConnectionError::DomainNotFoundError(e.to_string()))
+                    }
+                }
+            },
+            None => {
+                warn!("Attempted to find a domain without an active connection.");
+                Err(ConnectionError::DisconnectedInstanceError)
+            }
+        }
+    }
+
+    pub fn list_machines(&self) -> Result<Vec<Domain>, ConnectionError> {
+        match &self.conn {
+            Some(conn) => {
+                match conn.list_all_domains(0) {
+                    Ok(domains) => Ok(domains),
+                    Err(e) => {
+                        error!("Failed to list domains: {}", e);
+                        Err(ConnectionError::DomainListError(e.to_string()))
+                    }
+                }
+            },
+            None => {
+                warn!("Attempted to list domains without an active connection.");
                 Err(ConnectionError::DisconnectedInstanceError)
             }
         }
@@ -115,5 +153,21 @@ mod tests {
         let result = connection.define_domain_from_xml("<domain></domain>");
         assert!(result.is_err());
         info!("Test for define_domain_from_xml failure with no connection passed.");
+    }
+
+    #[test]
+    fn test_find_machine_failure_no_connection() {
+        let connection = Connection { conn: None };
+        let result = connection.find_machine("test");
+        assert!(result.is_err());
+        info!("Test for find_machine failure with no connection passed.");
+    }
+
+    #[test]
+    fn test_list_machines_failure_no_connection() {
+        let connection = Connection { conn: None };
+        let result = connection.list_machines();
+        assert!(result.is_err());
+        info!("Test for list_machines failure with no connection passed.");
     }
 }

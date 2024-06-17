@@ -4,21 +4,51 @@ use anyhow::{Result, anyhow};
 use std::fmt;
 use log::{info, error, warn};
 use crate::Connection;
-use napi::{Env, JsNumber, Result as NapiResult};
+use napi::{Env, JsNumber, JsObject, Result as NapiResult}; // Add JsObject import
+use napi::bindgen_prelude::FromNapiValue; // Add FromNapiValue import
 use napi_derive::napi;
 
 #[derive(Serialize, Deserialize, Debug)]
+#[napi(object)]
 pub struct VmConfig {
-    name: String,
-    ram: u64, // in MB
-    disk: String, // disk size as String, e.g., "10G"
-    tpm: bool,
-    spice: bool,
-    vnc: bool,
-    os_type: String,
-    arch: String, // Architecture, e.g., "x86_64"
-    machine_type: String, // Machine type, e.g., "pc-i440fx-2.9"
-    disk_image_path: String, // Path to the disk image
+    #[napi(js_name = "name")]
+    pub name: String,
+    #[napi(js_name = "ram")]
+    pub ram: u64, // in MB
+    #[napi(js_name = "disk")]
+    pub disk: String, // disk size as String, e.g., "10G"
+    #[napi(js_name = "tpm")]
+    pub tpm: bool,
+    #[napi(js_name = "spice")]
+    pub spice: bool,
+    #[napi(js_name = "vnc")]
+    pub vnc: bool,
+    #[napi(js_name = "osType")]
+    pub os_type: String,
+    #[napi(js_name = "arch")]
+    pub arch: String, // Architecture, e.g., "x86_64"
+    #[napi(js_name = "machineType")]
+    pub machine_type: String, // Machine type, e.g., "pc-i440fx-2.9"
+    #[napi(js_name = "diskImagePath")]
+    pub disk_image_path: String, // Path to the disk image
+}
+
+impl FromNapiValue for VmConfig {
+    unsafe fn from_napi_value(env: Env, value: napi::sys::napi_value) -> NapiResult<Self> {
+        let js_object: JsObject = JsObject::from_raw(env.raw(), value)?;
+        Ok(Self {
+            name: js_object.get_named_property("name")?,
+            ram: js_object.get_named_property("ram")?,
+            disk: js_object.get_named_property("disk")?,
+            tpm: js_object.get_named_property("tpm")?,
+            spice: js_object.get_named_property("spice")?,
+            vnc: js_object.get_named_property("vnc")?,
+            os_type: js_object.get_named_property("osType")?,
+            arch: js_object.get_named_property("arch")?,
+            machine_type: js_object.get_named_property("machineType")?,
+            disk_image_path: js_object.get_named_property("diskImagePath")?,
+        })
+    }
 }
 
 #[napi]
@@ -29,8 +59,26 @@ pub struct Machine {
 
 #[napi]
 impl Machine {
+    #[napi(constructor)]
     pub fn new(config: VmConfig) -> Self {
         Self { config, domain: None }
+    }
+
+    pub fn from_domain(domain: Domain) -> Result<Self> {
+        // Convert Domain to Machine
+        let config = VmConfig {
+            name: domain.get_name()?,
+            ram: domain.get_max_memory()?, // Correct method to get memory
+            disk: String::new(), // Placeholder, actual disk info extraction needed
+            tpm: false, // Placeholder, actual tpm info extraction needed
+            spice: false, // Placeholder, actual spice info extraction needed
+            vnc: false, // Placeholder, actual vnc info extraction needed
+            os_type: String::new(), // Placeholder, actual os_type extraction needed
+            arch: String::new(), // Placeholder, actual arch extraction needed
+            machine_type: String::new(), // Placeholder, actual machine_type extraction needed
+            disk_image_path: String::new(), // Placeholder, actual disk_image_path extraction needed
+        };
+        Ok(Self { config, domain: Some(domain) })
     }
 
     pub fn deploy(&mut self, conn: &Connection) -> Result<()> {
@@ -108,11 +156,10 @@ impl Machine {
     }
 
     #[napi]
-    pub fn set_ram(&mut self, _env: Env, ram: JsNumber) -> NapiResult<()> {
-        let ram_u64: u64 = ram.get_uint32()?.into();
-        info!("Setting RAM to {} MB", ram_u64);
+    pub fn set_ram(&mut self, ram: u64) -> NapiResult<()> {
+        info!("Setting RAM to {} MB", ram);
         if let Some(domain) = &self.domain {
-            if let Err(e) = domain.set_memory(ram_u64 * 1024) {
+            if let Err(e) = domain.set_memory(ram * 1024) {
                 error!("Error setting RAM: {}", e);
                 return Err(napi::Error::from_reason(format!("Failed to set RAM: {}", e)));
             }
@@ -120,16 +167,15 @@ impl Machine {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
         }
-        self.config.ram = ram_u64;
+        self.config.ram = ram;
         Ok(())
     }
 
     #[napi]
-    pub fn set_cpus(&mut self, _env: Env, cpus: JsNumber) -> NapiResult<()> {
-        let cpus_u32: u32 = cpus.get_uint32()?;
-        info!("Setting CPUs to {}", cpus_u32);
+    pub fn set_cpus(&mut self, cpus: u32) -> NapiResult<()> {
+        info!("Setting CPUs to {}", cpus);
         if let Some(domain) = &self.domain {
-            if let Err(e) = domain.set_vcpus(cpus_u32) {
+            if let Err(e) = domain.set_vcpus(cpus) {
                 error!("Error setting CPUs: {}", e);
                 return Err(napi::Error::from_reason(format!("Failed to set CPUs: {}", e)));
             }
@@ -141,12 +187,12 @@ impl Machine {
     }
 
     #[napi]
-    pub fn add_cdrom(&mut self, _env: Env, source_file: String) -> NapiResult<()> {
+    pub fn add_cdrom(&mut self, source_file: String) -> NapiResult<()> {
         info!("Adding CDROM from {}", source_file);
-        if let Some(domain) = &self.domain {
+        if let Some(_domain) = &self.domain {
             // Implementation to add a CDROM to the VM
             // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // domain.attach_device(...);
+            // _domain.attach_device(...);
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
@@ -155,12 +201,12 @@ impl Machine {
     }
 
     #[napi]
-    pub fn remove_cdrom(&mut self, _env: Env) -> NapiResult<()> {
+    pub fn remove_cdrom(&mut self) -> NapiResult<()> {
         info!("Removing CDROM");
-        if let Some(domain) = &self.domain {
+        if let Some(_domain) = &self.domain {
             // Implementation to remove the CDROM from the VM
             // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // domain.detach_device(...);
+            // _domain.detach_device(...);
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
@@ -169,12 +215,12 @@ impl Machine {
     }
 
     #[napi]
-    pub fn add_storage(&mut self, _env: Env, size: String, path: String) -> NapiResult<()> {
+    pub fn add_storage(&mut self, size: String, path: String) -> NapiResult<()> {
         info!("Adding storage of size {} at {}", size, path);
-        if let Some(domain) = &self.domain {
+        if let Some(_domain) = &self.domain {
             // Implementation to add extra storage to the VM
             // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // domain.attach_device(...);
+            // _domain.attach_device(...);
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
@@ -183,12 +229,12 @@ impl Machine {
     }
 
     #[napi]
-    pub fn remove_storage(&mut self, _env: Env, path: String) -> NapiResult<()> {
+    pub fn remove_storage(&mut self, path: String) -> NapiResult<()> {
         info!("Removing storage at {}", path);
-        if let Some(domain) = &self.domain {
+        if let Some(_domain) = &self.domain {
             // Implementation to remove storage from the VM
             // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // domain.detach_device(...);
+            // _domain.detach_device(...);
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
@@ -197,7 +243,7 @@ impl Machine {
     }
 
     #[napi]
-    pub fn power_on(&mut self, _env: Env) -> NapiResult<()> {
+    pub fn power_on(&mut self) -> NapiResult<()> {
         info!("Powering on VM");
         if let Some(domain) = &self.domain {
             if let Err(e) = domain.create() {
@@ -212,7 +258,7 @@ impl Machine {
     }
 
     #[napi]
-    pub fn power_off(&mut self, _env: Env, acpi: bool) -> NapiResult<()> {
+    pub fn power_off(&mut self, acpi: bool) -> NapiResult<()> {
         info!("Powering off VM with ACPI={}", acpi);
         if let Some(domain) = &self.domain {
             if acpi {
@@ -234,12 +280,12 @@ impl Machine {
     }
 
     #[napi]
-    pub fn set_boot_order(&mut self, _env: Env, boot_order: Vec<String>) -> NapiResult<()> {
+    pub fn set_boot_order(&mut self, boot_order: Vec<String>) -> NapiResult<()> {
         info!("Setting boot order to {:?}", boot_order);
-        if let Some(domain) = &self.domain {
+        if let Some(_domain) = &self.domain {
             // Implementation to set the VM's boot order
             // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // domain.set_boot_order(...);
+            // _domain.set_boot_order(...);
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
