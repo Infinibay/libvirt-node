@@ -2,6 +2,7 @@ use virt::{connect::Connect, domain::Domain};
 use anyhow::{Result, anyhow};
 use thiserror::Error;
 use log::{info, error, warn};
+use napi_derive::napi;
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -19,12 +20,19 @@ pub enum ConnectionError {
     DomainListError(String),
 }
 
+#[napi]
 pub struct Connection {
-    conn: Option<Connect>,
+    pub conn: Option<Connect>, // Change visibility to pub
 }
 
+#[napi]
 impl Connection {
-    pub fn new(uri: Option<&str>) -> Result<Self> {
+    #[napi(constructor)]
+    pub fn new(uri: Option<&str>) -> napi::Result<Self> {
+        Self::new_internal(uri).map_err(|e| napi::Error::from_reason(format!("Failed to establish a connection: {:?}", e)))
+    }
+
+    fn new_internal(uri: Option<&str>) -> Result<Self> {
         match Connect::open(uri.unwrap_or("")) {
             Ok(conn) => {
                 info!("Connection established to {}", uri.unwrap_or("default URI"));
@@ -37,7 +45,12 @@ impl Connection {
         }
     }
 
-    pub fn connect(&mut self, uri: &str) -> Result<(), ConnectionError> {
+    #[napi]
+    pub fn connect(&mut self, uri: &str) -> napi::Result<()> {
+        self.connect_internal(uri).map_err(|e| napi::Error::from_reason(format!("Failed to connect: {:?}", e)))
+    }
+
+    fn connect_internal(&mut self, uri: &str) -> Result<(), ConnectionError> {
         if self.conn.is_some() {
             warn!("Connection already exists.");
             return Ok(());
@@ -56,7 +69,12 @@ impl Connection {
         }
     }
 
-    pub fn disconnect(&mut self) -> Result<(), ConnectionError> {
+    #[napi]
+    pub fn disconnect(&mut self) -> napi::Result<()> {
+        self.disconnect_internal().map_err(|e| napi::Error::from_reason(format!("Failed to disconnect: {:?}", e)))
+    }
+
+    fn disconnect_internal(&mut self) -> Result<(), ConnectionError> {
         if let Some(mut conn) = self.conn.take() {
             match conn.close() {
                 Ok(_) => {
@@ -74,7 +92,12 @@ impl Connection {
         }
     }
 
-    pub fn define_domain_from_xml(&self, xml_desc: &str) -> Result<Domain, ConnectionError> {
+    #[napi]
+    pub fn define_domain_from_xml(&self, xml_desc: &str) -> napi::Result<Domain> {
+        self.define_domain_from_xml_internal(xml_desc).map_err(|e| napi::Error::from_reason(format!("Failed to define domain from XML: {:?}", e)))
+    }
+
+    fn define_domain_from_xml_internal(&self, xml_desc: &str) -> Result<Domain, ConnectionError> {
         match &self.conn {
             Some(conn) => {
                 match Domain::define_xml(&conn, xml_desc) {
@@ -92,7 +115,12 @@ impl Connection {
         }
     }
 
-    pub fn find_machine(&self, name: &str) -> Result<Domain, ConnectionError> {
+    #[napi]
+    pub fn find_machine(&self, name: &str) -> napi::Result<Domain> {
+        self.find_machine_internal(name).map_err(|e| napi::Error::from_reason(format!("Failed to find domain: {:?}", e)))
+    }
+
+    fn find_machine_internal(&self, name: &str) -> Result<Domain, ConnectionError> {
         match &self.conn {
             Some(conn) => {
                 match Domain::lookup_by_name(&conn, name) {
@@ -110,7 +138,12 @@ impl Connection {
         }
     }
 
-    pub fn list_machines(&self) -> Result<Vec<Domain>, ConnectionError> {
+    #[napi]
+    pub fn list_machines(&self) -> napi::Result<Vec<Domain>> {
+        self.list_machines_internal().map_err(|e| napi::Error::from_reason(format!("Failed to list domains: {:?}", e)))
+    }
+
+    fn list_machines_internal(&self) -> Result<Vec<Domain>, ConnectionError> {
         match &self.conn {
             Some(conn) => {
                 match conn.list_all_domains(0) {
@@ -126,6 +159,10 @@ impl Connection {
                 Err(ConnectionError::DisconnectedInstanceError)
             }
         }
+    }
+
+    pub fn get_conn(&self) -> Option<&Connect> {
+        self.conn.as_ref()
     }
 }
 

@@ -4,8 +4,7 @@ use anyhow::{Result, anyhow};
 use std::fmt;
 use log::{info, error, warn};
 use crate::Connection;
-use napi::{Env, JsNumber, JsObject, Result as NapiResult}; // Add JsObject import
-use napi::bindgen_prelude::FromNapiValue; // Add FromNapiValue import
+use napi::{Env, JsNumber, JsObject, Result as NapiResult};
 use napi_derive::napi;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -14,7 +13,7 @@ pub struct VmConfig {
     #[napi(js_name = "name")]
     pub name: String,
     #[napi(js_name = "ram")]
-    pub ram: u64, // in MB
+    pub ram: i64, // in MB, changed from u64 to i64
     #[napi(js_name = "disk")]
     pub disk: String, // disk size as String, e.g., "10G"
     #[napi(js_name = "tpm")]
@@ -33,24 +32,6 @@ pub struct VmConfig {
     pub disk_image_path: String, // Path to the disk image
 }
 
-impl FromNapiValue for VmConfig {
-    unsafe fn from_napi_value(env: Env, value: napi::sys::napi_value) -> NapiResult<Self> {
-        let js_object: JsObject = JsObject::from_raw(env.raw(), value)?;
-        Ok(Self {
-            name: js_object.get_named_property("name")?,
-            ram: js_object.get_named_property("ram")?,
-            disk: js_object.get_named_property("disk")?,
-            tpm: js_object.get_named_property("tpm")?,
-            spice: js_object.get_named_property("spice")?,
-            vnc: js_object.get_named_property("vnc")?,
-            os_type: js_object.get_named_property("osType")?,
-            arch: js_object.get_named_property("arch")?,
-            machine_type: js_object.get_named_property("machineType")?,
-            disk_image_path: js_object.get_named_property("diskImagePath")?,
-        })
-    }
-}
-
 #[napi]
 pub struct Machine {
     config: VmConfig,
@@ -64,11 +45,11 @@ impl Machine {
         Self { config, domain: None }
     }
 
-    pub fn from_domain(domain: Domain) -> Result<Self> {
-        // Convert Domain to Machine
+    #[napi(factory)]
+    pub fn from_domain(domain: Domain) -> napi::Result<Self> {
         let config = VmConfig {
-            name: domain.get_name()?,
-            ram: domain.get_max_memory()?, // Correct method to get memory
+            name: domain.get_name().map_err(|e| napi::Error::from_reason(format!("Failed to get domain name: {:?}", e)))?,
+            ram: domain.get_max_memory().map_err(|e| napi::Error::from_reason(format!("Failed to get max memory: {:?}", e)))? as i64,
             disk: String::new(), // Placeholder, actual disk info extraction needed
             tpm: false, // Placeholder, actual tpm info extraction needed
             spice: false, // Placeholder, actual spice info extraction needed
@@ -81,13 +62,14 @@ impl Machine {
         Ok(Self { config, domain: Some(domain) })
     }
 
-    pub fn deploy(&mut self, conn: &Connection) -> Result<()> {
-        let xml = self.generate_domain_xml()?;
+    #[napi]
+    pub fn deploy(&mut self, conn: &Connection) -> napi::Result<()> {
+        let xml = self.generate_domain_xml().map_err(|e| napi::Error::from_reason(format!("Failed to generate domain XML: {:?}", e)))?;
         match conn.define_domain_from_xml(&xml) {
             Ok(domain) => {
                 if let Err(e) = domain.create() {
                     error!("Error starting VM: {}", e);
-                    return Err(anyhow!("Failed to start VM: {}", e));
+                    return Err(napi::Error::from_reason(format!("Failed to start VM: {:?}", e)));
                 }
                 self.domain = Some(domain);
                 info!("VM successfully defined and started: {}", self.config.name);
@@ -95,24 +77,25 @@ impl Machine {
             },
             Err(e) => {
                 error!("Error defining VM: {}", e);
-                Err(anyhow!("Failed to define VM: {}", e))
+                Err(napi::Error::from_reason(format!("Failed to define VM: {:?}", e)))
             },
         }
     }
 
-    pub fn destroy(&mut self) -> Result<()> {
+    #[napi]
+    pub fn destroy(&mut self) -> napi::Result<()> {
         match &self.domain {
             Some(domain) => {
                 if let Err(e) = domain.destroy() {
                     error!("Error destroying VM: {}", e);
-                    return Err(anyhow!("Failed to destroy VM: {}", e));
+                    return Err(napi::Error::from_reason(format!("Failed to destroy VM: {:?}", e)));
                 }
                 info!("VM successfully destroyed: {}", self.config.name);
                 Ok(())
             },
             None => {
                 warn!("VM is not running: {}", self.config.name);
-                Err(anyhow!("VM is not running"))
+                Err(napi::Error::from_reason("VM is not running".to_string()))
             },
         }
     }
@@ -156,12 +139,12 @@ impl Machine {
     }
 
     #[napi]
-    pub fn set_ram(&mut self, ram: u64) -> NapiResult<()> {
+    pub fn set_ram(&mut self, ram: i64) -> napi::Result<()> {
         info!("Setting RAM to {} MB", ram);
         if let Some(domain) = &self.domain {
-            if let Err(e) = domain.set_memory(ram * 1024) {
+            if let Err(e) = domain.set_memory((ram * 1024).try_into().unwrap()) {
                 error!("Error setting RAM: {}", e);
-                return Err(napi::Error::from_reason(format!("Failed to set RAM: {}", e)));
+                return Err(napi::Error::from_reason(format!("Failed to set RAM: {:?}", e)));
             }
         } else {
             warn!("VM is not running: {}", self.config.name);
@@ -172,12 +155,12 @@ impl Machine {
     }
 
     #[napi]
-    pub fn set_cpus(&mut self, cpus: u32) -> NapiResult<()> {
+    pub fn set_cpus(&mut self, cpus: u32) -> napi::Result<()> {
         info!("Setting CPUs to {}", cpus);
         if let Some(domain) = &self.domain {
             if let Err(e) = domain.set_vcpus(cpus) {
                 error!("Error setting CPUs: {}", e);
-                return Err(napi::Error::from_reason(format!("Failed to set CPUs: {}", e)));
+                return Err(napi::Error::from_reason(format!("Failed to set CPUs: {:?}", e)));
             }
         } else {
             warn!("VM is not running: {}", self.config.name);
@@ -187,12 +170,22 @@ impl Machine {
     }
 
     #[napi]
-    pub fn add_cdrom(&mut self, source_file: String) -> NapiResult<()> {
+    pub fn add_cdrom(&mut self, source_file: String) -> napi::Result<()> {
         info!("Adding CDROM from {}", source_file);
-        if let Some(_domain) = &self.domain {
-            // Implementation to add a CDROM to the VM
-            // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // _domain.attach_device(...);
+        if let Some(domain) = &self.domain {
+            let xml = format!(r#"
+            <disk type='file' device='cdrom'>
+              <driver name='qemu' type='raw'/>
+              <source file='{}'/>
+              <target dev='hdc' bus='ide'/>
+              <readonly/>
+            </disk>
+            "#, source_file);
+
+            domain.attach_device(xml.as_str()).map_err(|e| {
+                error!("Error adding CDROM: {}", e);
+                napi::Error::from_reason(format!("Failed to add CDROM: {:?}", e))
+            })?;
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
@@ -201,12 +194,17 @@ impl Machine {
     }
 
     #[napi]
-    pub fn remove_cdrom(&mut self) -> NapiResult<()> {
+    pub fn remove_cdrom(&mut self) -> napi::Result<()> {
         info!("Removing CDROM");
-        if let Some(_domain) = &self.domain {
-            // Implementation to remove the CDROM from the VM
-            // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // _domain.detach_device(...);
+        if let Some(domain) = &self.domain {
+            let xml = "<disk type='file' device='cdrom'>
+              <target dev='hdc' bus='ide'/>
+            </disk>";
+
+            domain.detach_device(xml).map_err(|e| {
+                error!("Error removing CDROM: {}", e);
+                napi::Error::from_reason(format!("Failed to remove CDROM: {:?}", e))
+            })?;
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
@@ -215,12 +213,21 @@ impl Machine {
     }
 
     #[napi]
-    pub fn add_storage(&mut self, size: String, path: String) -> NapiResult<()> {
+    pub fn add_storage(&mut self, size: String, path: String) -> napi::Result<()> {
         info!("Adding storage of size {} at {}", size, path);
-        if let Some(_domain) = &self.domain {
-            // Implementation to add extra storage to the VM
-            // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // _domain.attach_device(...);
+        if let Some(domain) = &self.domain {
+            let xml = format!(r#"
+            <disk type='file' device='disk'>
+              <driver name='qemu' type='qcow2'/>
+              <source file='{}'/>
+              <target dev='vdb' bus='virtio'/>
+            </disk>
+            "#, path);
+
+            domain.attach_device(xml.as_str()).map_err(|e| {
+                error!("Error adding storage: {}", e);
+                napi::Error::from_reason(format!("Failed to add storage: {:?}", e))
+            })?;
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
@@ -229,12 +236,20 @@ impl Machine {
     }
 
     #[napi]
-    pub fn remove_storage(&mut self, path: String) -> NapiResult<()> {
+    pub fn remove_storage(&mut self, path: String) -> napi::Result<()> {
         info!("Removing storage at {}", path);
-        if let Some(_domain) = &self.domain {
-            // Implementation to remove storage from the VM
-            // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // _domain.detach_device(...);
+        if let Some(domain) = &self.domain {
+            let xml = format!(r#"
+            <disk type='file' device='disk'>
+              <source file='{}'/>
+              <target dev='vdb' bus='virtio'/>
+            </disk>
+            "#, path);
+
+            domain.detach_device(xml.as_str()).map_err(|e| {
+                error!("Error removing storage: {}", e);
+                napi::Error::from_reason(format!("Failed to remove storage: {:?}", e))
+            })?;
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
@@ -243,12 +258,12 @@ impl Machine {
     }
 
     #[napi]
-    pub fn power_on(&mut self) -> NapiResult<()> {
+    pub fn power_on(&mut self) -> napi::Result<()> {
         info!("Powering on VM");
         if let Some(domain) = &self.domain {
             if let Err(e) = domain.create() {
                 error!("Error powering on VM: {}", e);
-                return Err(napi::Error::from_reason(format!("Failed to power on VM: {}", e)));
+                return Err(napi::Error::from_reason(format!("Failed to power on VM: {:?}", e)));
             }
         } else {
             warn!("VM is not running: {}", self.config.name);
@@ -258,18 +273,18 @@ impl Machine {
     }
 
     #[napi]
-    pub fn power_off(&mut self, acpi: bool) -> NapiResult<()> {
+    pub fn power_off(&mut self, acpi: bool) -> napi::Result<()> {
         info!("Powering off VM with ACPI={}", acpi);
         if let Some(domain) = &self.domain {
             if acpi {
                 if let Err(e) = domain.shutdown() {
                     error!("Error shutting down VM with ACPI: {}", e);
-                    return Err(napi::Error::from_reason(format!("Failed to shut down VM with ACPI: {}", e)));
+                    return Err(napi::Error::from_reason(format!("Failed to shut down VM with ACPI: {:?}", e)));
                 }
             } else {
                 if let Err(e) = domain.destroy() {
                     error!("Error forcing off VM: {}", e);
-                    return Err(napi::Error::from_reason(format!("Failed to force off VM: {}", e)));
+                    return Err(napi::Error::from_reason(format!("Failed to force off VM: {:?}", e)));
                 }
             }
         } else {
@@ -280,12 +295,20 @@ impl Machine {
     }
 
     #[napi]
-    pub fn set_boot_order(&mut self, boot_order: Vec<String>) -> NapiResult<()> {
+    pub fn set_boot_order(&mut self, boot_order: Vec<String>) -> napi::Result<()> {
         info!("Setting boot order to {:?}", boot_order);
-        if let Some(_domain) = &self.domain {
-            // Implementation to set the VM's boot order
-            // This is a placeholder, actual implementation will depend on the virt crate's capabilities
-            // _domain.set_boot_order(...);
+        if let Some(domain) = &self.domain {
+            let boot_order_xml = boot_order.into_iter().map(|dev| format!("<boot dev='{}'/>", dev)).collect::<String>();
+            let xml = format!(r#"
+            <os>
+              {}
+            </os>
+            "#, boot_order_xml);
+
+            domain.update_device_flags(xml.as_str(), 0).map_err(|e| {
+                error!("Error setting boot order: {}", e);
+                napi::Error::from_reason(format!("Failed to set boot order: {:?}", e))
+            })?;
         } else {
             warn!("VM is not running: {}", self.config.name);
             return Err(napi::Error::from_reason("VM is not running".to_string()));
