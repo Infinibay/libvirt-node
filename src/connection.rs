@@ -3,7 +3,6 @@ use anyhow::{Result, anyhow};
 use thiserror::Error;
 use log::{info, error, warn};
 use napi_derive::napi;
-use napi::bindgen_prelude::{ToNapiValue, FromNapiValue, FromNapiRef};
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -23,26 +22,20 @@ pub enum ConnectionError {
 
 #[napi]
 pub struct Connection {
-    pub conn: Option<Connect>, // Change visibility to pub
-}
-
-impl Clone for Connect {
-    fn clone(&self) -> Self {
-        Connect::open(self.get_uri().unwrap_or("").to_string()).unwrap()
-    }
+    conn: Option<Connect>, // keep the connection internally
 }
 
 #[napi]
 impl Connection {
     #[napi(constructor)]
-    pub fn new(uri: Option<&str>) -> napi::Result<Self> {
+    pub fn new(uri: Option<String>) -> napi::Result<Self> {
         Self::new_internal(uri).map_err(|e| napi::Error::from_reason(format!("Failed to establish a connection: {:?}", e)))
     }
 
-    fn new_internal(uri: Option<&str>) -> Result<Self> {
-        match Connect::open(uri.unwrap_or("")) {
+    fn new_internal(uri: Option<String>) -> Result<Self> {
+        match Connect::open(&uri.unwrap_or("".to_string())) {
             Ok(conn) => {
-                info!("Connection established to {}", uri.unwrap_or("default URI"));
+                info!("Connection established to {}", uri.unwrap_or("default URI".to_string()));
                 Ok(Self { conn: Some(conn) })
             },
             Err(e) => {
@@ -53,17 +46,17 @@ impl Connection {
     }
 
     #[napi]
-    pub fn connect(&mut self, uri: &str) -> napi::Result<()> {
+    pub fn connect(&mut self, uri: String) -> napi::Result<()> {
         self.connect_internal(uri).map_err(|e| napi::Error::from_reason(format!("Failed to connect: {:?}", e)))
     }
 
-    fn connect_internal(&mut self, uri: &str) -> Result<(), ConnectionError> {
+    fn connect_internal(&mut self, uri: String) -> Result<(), ConnectionError> {
         if self.conn.is_some() {
             warn!("Connection already exists.");
             return Ok(());
         }
 
-        match Connect::open(uri) {
+        match Connect::open(&uri) {
             Ok(conn) => {
                 self.conn = Some(conn);
                 info!("Connection established to {}", uri);
@@ -100,18 +93,18 @@ impl Connection {
     }
 
     #[napi]
-    pub fn define_domain_from_xml(&self, xml_desc: &str) -> napi::Result<Domain> {
+    pub fn define_domain_from_xml(&self, xml_desc: String) -> napi::Result<Domain> {
         self.define_domain_from_xml_internal(xml_desc).map_err(|e| napi::Error::from_reason(format!("Failed to define domain from XML: {:?}", e)))
     }
 
-    fn define_domain_from_xml_internal(&self, xml_desc: &str) -> Result<Domain, ConnectionError> {
+    fn define_domain_from_xml_internal(&self, xml_desc: String) -> Result<Domain, ConnectionError> {
         match &self.conn {
             Some(conn) => {
-                match Domain::define_xml(&conn, xml_desc) {
+                match Domain::define_xml(&conn, &xml_desc) {
                     Ok(domain) => Ok(domain),
                     Err(e) => {
                         error!("Failed to define domain from XML: {}", e);
-                        Err(ConnectionError::DomainDefineError(e.to_string())))
+                        Err(ConnectionError::DomainDefineError(e.to_string()))
                     }
                 }
             },
@@ -123,18 +116,18 @@ impl Connection {
     }
 
     #[napi]
-    pub fn find_machine(&self, name: &str) -> napi::Result<Domain> {
+    pub fn find_machine(&self, name: String) -> napi::Result<Domain> {
         self.find_machine_internal(name).map_err(|e| napi::Error::from_reason(format!("Failed to find domain: {:?}", e)))
     }
 
-    fn find_machine_internal(&self, name: &str) -> Result<Domain, ConnectionError> {
+    fn find_machine_internal(&self, name: String) -> Result<Domain, ConnectionError> {
         match &self.conn {
             Some(conn) => {
-                match Domain::lookup_by_name(&conn, name) {
+                match Domain::lookup_by_name(&conn, &name) {
                     Ok(domain) => Ok(domain),
                     Err(e) => {
                         error!("Failed to find domain by name {}: {}", name, e);
-                        Err(ConnectionError::DomainNotFoundError(e.to_string())))
+                        Err(ConnectionError::DomainNotFoundError(e.to_string()))
                     }
                 }
             },
@@ -157,7 +150,7 @@ impl Connection {
                     Ok(domains) => Ok(domains),
                     Err(e) => {
                         error!("Failed to list domains: {}", e);
-                        Err(ConnectionError::DomainListError(e.to_string())))
+                        Err(ConnectionError::DomainListError(e.to_string()))
                     }
                 }
             },
@@ -170,32 +163,6 @@ impl Connection {
 
     pub fn get_conn(&self) -> Option<&Connect> {
         self.conn.as_ref()
-    }
-}
-
-// Implement ToNapiValue and FromNapiValue for Option<Connect>
-impl napi::bindgen_prelude::ToNapiValue for Option<Connect> {
-    unsafe fn to_napi_value(env: napi::sys::napi_env, val: Self) -> napi::Result<napi::sys::napi_value> {
-        match val {
-            Some(conn) => napi::JsString::from(env, &conn.get_uri().unwrap_or_default()).map(|js_str| js_str.raw()),
-            None => napi::JsObject::new(env).map(|js_obj| js_obj.raw()),
-        }
-    }
-}
-
-impl napi::bindgen_prelude::FromNapiValue for Option<Connect> {
-    unsafe fn from_napi_value(env: napi::sys::napi_env, napi_val: napi::sys::napi_value) -> napi::Result<Self> {
-        let js_str = napi::JsString::from_napi_value(env, napi_val)?;
-        let uri = js_str.into_utf8()?.as_str()?.to_string();
-        Ok(Some(Connect::open(&uri).map_err(|e| napi::Error::from_reason(format!("Failed to open connection: {:?}", e)))?))
-    }
-}
-
-// Implement FromNapiRef for &str
-impl napi::bindgen_prelude::FromNapiRef for &str {
-    fn from_napi_ref(env: napi::sys::napi_env, napi_val: napi::sys::napi_value) -> napi::Result<Self> {
-        let js_str = napi::JsString::from_napi_value(env, napi_val)?;
-        Ok(js_str.into_utf8()?.as_str()?)
     }
 }
 

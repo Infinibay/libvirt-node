@@ -1,10 +1,8 @@
 mod connection;
 mod machine;
-mod traits; // Ensure traits are included
 
 pub use connection::{Connection, ConnectionError};
 pub use machine::{Machine, VmConfig};
-pub use traits::*; // Re-export traits
 
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
@@ -19,10 +17,10 @@ impl Libvirt {
     #[napi(constructor)]
     pub fn new(connection_string: Option<String>) -> napi::Result<Self> {
         let connection = match connection_string {
-            Some(conn_str) => Connection::new(Some(&conn_str)).map_err(|e| {
+            Some(conn_str) => Connection::new(Some(conn_str)).map_err(|e| {
                 napi::Error::from_reason(format!("Failed to create connection: {:?}", e))
             })?,
-            None => Connection::new(Some("qemu:///system")).map_err(|e| {
+            None => Connection::new(Some("qemu:///system".to_string())).map_err(|e| {
                 napi::Error::from_reason(format!("Failed to create default connection: {:?}", e))
             })?,
         };
@@ -31,7 +29,7 @@ impl Libvirt {
 
     #[napi]
     pub fn connect(&mut self, connection_string: String) -> napi::Result<()> {
-        self.connection.connect(&connection_string).map_err(|e| {
+        self.connection.connect(connection_string).map_err(|e| {
             napi::Error::from_reason(format!("Failed to connect: {:?}", e))
         })
     }
@@ -45,10 +43,10 @@ impl Libvirt {
 
     #[napi]
     pub fn find_machine(&self, name: String) -> napi::Result<Machine> {
-        self.connection.find_machine(&name).map_err(|e| {
+        self.connection.find_machine(name).map_err(|e| {
             napi::Error::from_reason(format!("Failed to find machine: {:?}", e))
         }).and_then(|domain| {
-            Machine::from_domain(domain).map_err(|e| {
+            Machine::fromDomain(domain).map_err(|e| {
                 napi::Error::from_reason(format!("Failed to convert domain to machine: {:?}", e))
             })
         })
@@ -60,7 +58,7 @@ impl Libvirt {
             napi::Error::from_reason(format!("Failed to list machines: {:?}", e))
         }).and_then(|domains| {
             domains.into_iter().map(|domain| {
-                Machine::from_domain(domain).map_err(|e| {
+                Machine::fromDomain(domain).map_err(|e| {
                     napi::Error::from_reason(format!("Failed to convert domain to machine: {:?}", e))
                 })
             }).collect::<napi::Result<Vec<_>>>()

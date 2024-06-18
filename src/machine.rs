@@ -13,7 +13,7 @@ pub struct VmConfig {
     #[napi(js_name = "name")]
     pub name: String,
     #[napi(js_name = "ram")]
-    pub ram: i64, // in MB, changed from u64 to i64
+    pub ram: i64, // in MB, changed from i64 to i64
     #[napi(js_name = "disk")]
     pub disk: String, // disk size as String, e.g., "10G"
     #[napi(js_name = "tpm")]
@@ -45,8 +45,8 @@ impl Machine {
         Self { config, domain: None }
     }
 
-    #[napi(factory)]
-    pub fn from_domain(domain: Domain) -> napi::Result<Self> {
+    // Internal Method
+    pub fn fromDomain(domain: Domain) -> napi::Result<Self> {
         let config = VmConfig {
             name: domain.get_name().map_err(|e| napi::Error::from_reason(format!("Failed to get domain name: {:?}", e)))?,
             ram: domain.get_max_memory().map_err(|e| napi::Error::from_reason(format!("Failed to get max memory: {:?}", e)))? as i64,
@@ -65,7 +65,7 @@ impl Machine {
     #[napi]
     pub fn deploy(&mut self, conn: &Connection) -> napi::Result<()> {
         let xml = self.generate_domain_xml().map_err(|e| napi::Error::from_reason(format!("Failed to generate domain XML: {:?}", e)))?;
-        match conn.define_domain_from_xml(&xml) {
+        match conn.define_domain_from_xml(xml) {
             Ok(domain) => {
                 if let Err(e) = domain.create() {
                     error!("Error starting VM: {}", e);

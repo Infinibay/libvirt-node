@@ -284,6 +284,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Machine } = nativeBinding
+const { Machine, Libvirt } = nativeBinding
 
 module.exports.Machine = Machine
+module.exports.Libvirt = Libvirt
