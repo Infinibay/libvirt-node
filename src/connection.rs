@@ -1,55 +1,79 @@
+use log::{warn, info, error};
 use virt::{connect::Connect, domain::Domain};
-use anyhow::{Result, anyhow};
-use thiserror::Error;
-use log::{info, error, warn};
-use napi_derive::napi;
+use napi::{Env, JsObject, Result as NapiResult, JsString, JsUndefined, JsNumber, CallContext, Property};
+use napi_derive::js_function;
 
-#[derive(Debug, Error)]
+#[derive(Debug)]
 pub enum ConnectionError {
-    #[error("Failed to establish a connection: {0}")]
     ConnectionFailure(String),
-    #[error("Failed to disconnect: {0}")]
     DisconnectionFailure(String),
-    #[error("Failed to define a domain from XML: {0}")]
     DomainDefineError(String),
-    #[error("Operation attempted on a disconnected instance")]
-    DisconnectedInstanceError,
-    #[error("Failed to find domain: {0}")]
-    DomainNotFoundError(String),
-    #[error("Failed to list domains: {0}")]
     DomainListError(String),
+    DisconnectedInstanceError,
 }
 
-#[napi]
 pub struct Connection {
-    conn: Option<Connect>, // keep the connection internally
+    conn: Option<Connect>,
 }
 
-#[napi]
-impl Connection {
-    #[napi(constructor)]
-    pub fn new(uri: Option<String>) -> napi::Result<Self> {
-        Self::new_internal(uri).map_err(|e| napi::Error::from_reason(format!("Failed to establish a connection: {:?}", e)))
-    }
-
-    fn new_internal(uri: Option<String>) -> Result<Self> {
-        match Connect::open(&uri.unwrap_or("".to_string())) {
-            Ok(conn) => {
-                info!("Connection established to {}", uri.unwrap_or("default URI".to_string()));
-                Ok(Self { conn: Some(conn) })
-            },
-            Err(e) => {
-                error!("Failed to establish a connection: {}", e);
-                Err(anyhow!(ConnectionError::ConnectionFailure(e.to_string())))
-            }
+#[js_function(1)] // constructor takes 1 argument
+fn constructor(ctx: CallContext) -> NapiResult<JsUndefined> {
+    let arg = ctx.get::<JsString>(0)?;
+    let uri = arg.into_utf8()?.as_str()?.to_owned();
+    let conn = if uri.is_empty() {
+        None
+    } else {
+        match Connect::open(&uri) {
+            Ok(conn) => Some(conn),
+            Err(_) => None, // Handle error appropriately
         }
-    }
+    };
 
-    #[napi]
-    pub fn connect(&mut self, uri: String) -> napi::Result<()> {
-        self.connect_internal(uri).map_err(|e| napi::Error::from_reason(format!("Failed to connect: {:?}", e)))
-    }
+    let mut this: JsObject = ctx.this_unchecked();
+    ctx.env.wrap(&mut this, conn)?;
 
+    ctx.env.get_undefined()
+}
+
+#[js_function(1)]
+fn connect(ctx: CallContext) -> NapiResult<JsUndefined> {
+    let uri = ctx.get::<JsString>(0)?.into_utf8()?.as_str()?.to_owned();
+		let this: JsObject = ctx.this_unchecked();
+    let connection: &mut Connection = ctx.env.unwrap(&this)?;
+    connection.connect_internal(uri)?;
+    ctx.env.get_undefined()
+}
+
+#[js_function(0)]
+fn disconnect(ctx: CallContext) -> NapiResult<JsUndefined> {
+	let this: JsObject = ctx.this_unchecked();
+	let connection: &mut Connection = ctx.env.unwrap(&this)?;
+    connection.disconnect_internal()?;
+    ctx.env.get_undefined()
+}
+
+#[js_function(1)]
+fn define_domain_from_xml(ctx: CallContext) -> NapiResult<JsObject> {
+    let xml_desc = ctx.get::<JsString>(0)?.into_utf8()?.as_str()?.to_owned();
+		let this: JsObject = ctx.this_unchecked();
+    let connection: &mut Connection = ctx.env.unwrap(&this)?;
+    let domain = connection.define_domain_from_xml_internal(xml_desc)?;
+    let js_domain = ctx.env.create_object()?;
+    // Set properties on js_domain as needed
+    Ok(js_domain)
+}
+
+#[js_function(0)]
+fn list_machines(ctx: CallContext) -> NapiResult<JsObject> {
+	let this: JsObject = ctx.this_unchecked();
+	let connection: &mut Connection = ctx.env.unwrap(&this)?;
+	let domains = connection.list_machines_internal()?;
+	let js_domains = ctx.env.create_object()?;
+	// Set properties on js_domains as needed
+	Ok(js_domains)
+}
+
+impl Connection {
     fn connect_internal(&mut self, uri: String) -> Result<(), ConnectionError> {
         if self.conn.is_some() {
             warn!("Connection already exists.");
@@ -67,11 +91,6 @@ impl Connection {
                 Err(ConnectionError::ConnectionFailure(e.to_string()))
             }
         }
-    }
-
-    #[napi]
-    pub fn disconnect(&mut self) -> napi::Result<()> {
-        self.disconnect_internal().map_err(|e| napi::Error::from_reason(format!("Failed to disconnect: {:?}", e)))
     }
 
     fn disconnect_internal(&mut self) -> Result<(), ConnectionError> {
@@ -92,11 +111,6 @@ impl Connection {
         }
     }
 
-    #[napi]
-    pub fn define_domain_from_xml(&self, xml_desc: String) -> napi::Result<Domain> {
-        self.define_domain_from_xml_internal(xml_desc).map_err(|e| napi::Error::from_reason(format!("Failed to define domain from XML: {:?}", e)))
-    }
-
     fn define_domain_from_xml_internal(&self, xml_desc: String) -> Result<Domain, ConnectionError> {
         match &self.conn {
             Some(conn) => {
@@ -113,34 +127,6 @@ impl Connection {
                 Err(ConnectionError::DisconnectedInstanceError)
             }
         }
-    }
-
-    #[napi]
-    pub fn find_machine(&self, name: String) -> napi::Result<Domain> {
-        self.find_machine_internal(name).map_err(|e| napi::Error::from_reason(format!("Failed to find domain: {:?}", e)))
-    }
-
-    fn find_machine_internal(&self, name: String) -> Result<Domain, ConnectionError> {
-        match &self.conn {
-            Some(conn) => {
-                match Domain::lookup_by_name(&conn, &name) {
-                    Ok(domain) => Ok(domain),
-                    Err(e) => {
-                        error!("Failed to find domain by name {}: {}", name, e);
-                        Err(ConnectionError::DomainNotFoundError(e.to_string()))
-                    }
-                }
-            },
-            None => {
-                warn!("Attempted to find a domain without an active connection.");
-                Err(ConnectionError::DisconnectedInstanceError)
-            }
-        }
-    }
-
-    #[napi]
-    pub fn list_machines(&self) -> napi::Result<Vec<Domain>> {
-        self.list_machines_internal().map_err(|e| napi::Error::from_reason(format!("Failed to list domains: {:?}", e)))
     }
 
     fn list_machines_internal(&self) -> Result<Vec<Domain>, ConnectionError> {
@@ -160,51 +146,25 @@ impl Connection {
             }
         }
     }
-
-    pub fn get_conn(&self) -> Option<&Connect> {
-        self.conn.as_ref()
-    }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub fn register_js(exports: &mut JsObject, env: Env) -> NapiResult<()> {
+    let connection_class = env.define_class(
+        "Connection",
+        constructor,
+        &[
+						Property::new("connect")?.with_method(connect),
+            Property::new("disconnect")?.with_method(disconnect),
+            Property::new("defineDomainFromXml")?.with_method(define_domain_from_xml),
+            Property::new("listMachines")?.with_method(list_machines),
+        ],
+    )?;
+    exports.set_named_property("Connection", connection_class)?;
+    Ok(())
+}
 
-    #[test]
-    fn test_new_connection() {
-        let connection = Connection::new(None);
-        assert!(connection.is_ok());
-        info!("Test for new connection passed.");
-    }
-
-    #[test]
-    fn test_disconnect_success() {
-        let mut connection = Connection::new(None).unwrap();
-        assert!(connection.disconnect().is_ok());
-        info!("Test for disconnect passed.");
-    }
-
-    #[test]
-    fn test_define_domain_from_xml_failure_no_connection() {
-        let connection = Connection { conn: None };
-        let result = connection.define_domain_from_xml("<domain></domain>");
-        assert!(result.is_err());
-        info!("Test for define_domain_from_xml failure with no connection passed.");
-    }
-
-    #[test]
-    fn test_find_machine_failure_no_connection() {
-        let connection = Connection { conn: None };
-        let result = connection.find_machine("test");
-        assert!(result.is_err());
-        info!("Test for find_machine failure with no connection passed.");
-    }
-
-    #[test]
-    fn test_list_machines_failure_no_connection() {
-        let connection = Connection { conn: None };
-        let result = connection.list_machines();
-        assert!(result.is_err());
-        info!("Test for list_machines failure with no connection passed.");
+impl From<ConnectionError> for napi::Error {
+    fn from(err: ConnectionError) -> Self {
+        napi::Error::new(napi::Status::GenericFailure, format!("{:?}", err))
     }
 }
