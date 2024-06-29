@@ -1,13 +1,13 @@
 
 use napi::{
-  CallContext, Env, Error as NapiError, JsBoolean, JsObject, JsString, JsUndefined, Property,
-  Result as NapiResult, Status,
+  CallContext, Env, JsBoolean, JsObject, JsString, JsUndefined, Property,
+  Result as NapiResult,
 };
-use napi_derive::napi;
-use std::sync::Mutex;
+
 use virt::{connect::Connect, domain::Domain};
 
-use log::{error, info, warn};
+// Add them when we need them
+// use log::{error, info, warn};
 use napi_derive::js_function;
 
 #[macro_use]
@@ -372,6 +372,9 @@ fn init(mut exports: JsObject, env: Env) -> Result<(), napi::Error> {
             Property::new("listMachines")?.with_method(libvirt_list_machines),
             Property::new("suspendMachine")?.with_method(libvirt_suspend),
             Property::new("getDomainInfo")?.with_method(libvirt_get_domain_info),
+            Property::new("powerOn")?.with_method(libvirt_power_resume),
+            Property::new("powerOff")?.with_method(libvirt_power_off),
+            Property::new("defineXML")?.with_method(libvirt_define_xml),
         ],
     )?;
     exports.set_named_property("Libvirt", libvirt_class)?;

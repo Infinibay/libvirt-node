@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Template project for writing node package with napi-rs",
   "main": "index.js",
+  "types": "index.d.ts",
   "repository": "git@github.com:napi-rs/package-template.git",
   "license": "MIT",
   "keywords": [
@@ -93,6 +94,9 @@
     ],
     "extensions": [
       "ts"
+    ],
+    "files": [
+      "__test__/*.spec.js"
     ],
     "timeout": "2m",
     "workerThreads": false,
