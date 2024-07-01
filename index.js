@@ -37,7 +37,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.android-arm64.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-android-arm64')
+            nativeBinding = require('@infinibay/libvirt-node-android-arm64')
           }
         } catch (e) {
           loadError = e
@@ -49,7 +49,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.android-arm-eabi.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-android-arm-eabi')
+            nativeBinding = require('@infinibay/libvirt-node-android-arm-eabi')
           }
         } catch (e) {
           loadError = e
@@ -69,7 +69,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.win32-x64-msvc.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-win32-x64-msvc')
+            nativeBinding = require('@infinibay/libvirt-node-win32-x64-msvc')
           }
         } catch (e) {
           loadError = e
@@ -83,7 +83,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.win32-ia32-msvc.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-win32-ia32-msvc')
+            nativeBinding = require('@infinibay/libvirt-node-win32-ia32-msvc')
           }
         } catch (e) {
           loadError = e
@@ -97,7 +97,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.win32-arm64-msvc.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-win32-arm64-msvc')
+            nativeBinding = require('@infinibay/libvirt-node-win32-arm64-msvc')
           }
         } catch (e) {
           loadError = e
@@ -113,7 +113,7 @@ switch (platform) {
       if (localFileExisted) {
         nativeBinding = require('./libvirt.darwin-universal.node')
       } else {
-        nativeBinding = require('@napi-rs/package-template-darwin-universal')
+        nativeBinding = require('@infinibay/libvirt-node-darwin-universal')
       }
       break
     } catch {}
@@ -124,7 +124,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.darwin-x64.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-darwin-x64')
+            nativeBinding = require('@infinibay/libvirt-node-darwin-x64')
           }
         } catch (e) {
           loadError = e
@@ -138,7 +138,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.darwin-arm64.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-darwin-arm64')
+            nativeBinding = require('@infinibay/libvirt-node-darwin-arm64')
           }
         } catch (e) {
           loadError = e
@@ -157,7 +157,7 @@ switch (platform) {
       if (localFileExisted) {
         nativeBinding = require('./libvirt.freebsd-x64.node')
       } else {
-        nativeBinding = require('@napi-rs/package-template-freebsd-x64')
+        nativeBinding = require('@infinibay/libvirt-node-freebsd-x64')
       }
     } catch (e) {
       loadError = e
@@ -174,7 +174,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-x64-musl.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-x64-musl')
+              nativeBinding = require('@infinibay/libvirt-node-linux-x64-musl')
             }
           } catch (e) {
             loadError = e
@@ -187,7 +187,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-x64-gnu.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-x64-gnu')
+              nativeBinding = require('@infinibay/libvirt-node-linux-x64-gnu')
             }
           } catch (e) {
             loadError = e
@@ -203,7 +203,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-arm64-musl.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-arm64-musl')
+              nativeBinding = require('@infinibay/libvirt-node-linux-arm64-musl')
             }
           } catch (e) {
             loadError = e
@@ -216,7 +216,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-arm64-gnu.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-arm64-gnu')
+              nativeBinding = require('@infinibay/libvirt-node-linux-arm64-gnu')
             }
           } catch (e) {
             loadError = e
@@ -232,7 +232,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-arm-musleabihf.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-arm-musleabihf')
+              nativeBinding = require('@infinibay/libvirt-node-linux-arm-musleabihf')
             }
           } catch (e) {
             loadError = e
@@ -245,7 +245,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-arm-gnueabihf.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-arm-gnueabihf')
+              nativeBinding = require('@infinibay/libvirt-node-linux-arm-gnueabihf')
             }
           } catch (e) {
             loadError = e
@@ -261,7 +261,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-riscv64-musl.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-riscv64-musl')
+              nativeBinding = require('@infinibay/libvirt-node-linux-riscv64-musl')
             }
           } catch (e) {
             loadError = e
@@ -274,7 +274,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-riscv64-gnu.node')
             } else {
-              nativeBinding = require('@napi-rs/package-template-linux-riscv64-gnu')
+              nativeBinding = require('@infinibay/libvirt-node-linux-riscv64-gnu')
             }
           } catch (e) {
             loadError = e
@@ -289,7 +289,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.linux-s390x-gnu.node')
           } else {
-            nativeBinding = require('@napi-rs/package-template-linux-s390x-gnu')
+            nativeBinding = require('@infinibay/libvirt-node-linux-s390x-gnu')
           }
         } catch (e) {
           loadError = e
@@ -310,7 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Connection, Machine, Network, Interface, NodeDevice, Secret, StoragePool, NwFilter } = nativeBinding
+const { Connection, Machine, Network, Interface, NodeDevice, Secret, StoragePool, NwFilter, NodeInfo, DomainStatsRecord } = nativeBinding
 
 module.exports.Connection = Connection
 module.exports.Machine = Machine
@@ -320,3 +320,5 @@ module.exports.NodeDevice = NodeDevice
 module.exports.Secret = Secret
 module.exports.StoragePool = StoragePool
 module.exports.NwFilter = NwFilter
+module.exports.NodeInfo = NodeInfo
+module.exports.DomainStatsRecord = DomainStatsRecord

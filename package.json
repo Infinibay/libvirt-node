@@ -1,10 +1,10 @@
 {
-  "name": "@napi-rs/package-template",
-  "version": "1.0.0",
-  "description": "Template project for writing node package with napi-rs",
+  "name": "@infinibay/libvirt-node",
+  "version": "0.0.1",
+  "description": "Node.js bindings for libvirt",
   "main": "index.js",
   "types": "index.d.ts",
-  "repository": "git@github.com:napi-rs/package-template.git",
+  "repository": "git@github.com:infinibay/libvirt-node.git",
   "license": "MIT",
   "keywords": [
     "napi-rs",

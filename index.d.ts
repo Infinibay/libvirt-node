@@ -24,6 +24,31 @@ export class Connection {
   listAllSecrets(flags: number): Array<Secret>
   listAllStoragePools(flags: number): Array<StoragePool>
   listAllNwFilters(flags: number): Array<NWFilter>
+  listDefinedDomains(): Array<string>
+  listDefinedInterfaces(): Array<string>
+  listDefinedStoragePools(): Array<string>
+  listDefinedNetworks(): Array<string>
+  numOfDomains(): number
+  numOfInterfaces(): number
+  numOfNetworks(): number
+  numOfStoragePools(): number
+  numOfNwFilters(): number
+  numOfSecrets(): number
+  numOfNodeDevices(): number
+  numOfDefinedDomains(): number
+  numOfDefinedInterfaces(): number
+  numOfDefinedNetworks(): number
+  getHypVersion(): number
+  compareCpu(xml: string, flags: number): number
+  getFreeMemory(): bigint
+  getNodeInfo(): NodeInfo
+  setKeepAlive(interval: number, count: number): number
+  domainXmlFromNative(nformat: string, nconfig: string, flags: number): string
+  domainXmlToNative(nformat: string, dxml: string, flags: number): string
+  getDomainCapabilities(emulatorbin: string, arch: string, machine: string, virttype: string, flags: number): string
+  getAllDomainStats(stats: number, flags: number): Array<DomainStatsRecord>
+  baselineCpu(xmlcpus: Array<string>, flags: number): string
+  findStoragePoolSources(kind: string, spec: string, flags: number): string
 }
 export class Machine {
   static fromName(name: string, con: Connection): this
@@ -35,3 +60,5 @@ export class Secret { }
 export class StoragePool { }
 export type NWFilter = NwFilter
 export class NwFilter { }
+export class NodeInfo { }
+export class DomainStatsRecord { }
