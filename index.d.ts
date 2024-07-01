@@ -52,6 +52,98 @@ export class Connection {
 }
 export class Machine {
   static lookupByName(name: string, con: Connection): this
+  static lookupById(conn: Connection, id: number): Machine
+  static lookupByUuidString(conn: Connection, uuid: string): Machine
+  getState(): StateResult
+  getName(): string
+  getOsType(): string
+  getHostname(flags: number): string
+  getUuidString(): string
+  getId(): number | null
+  getXmlDesc(flags: number): string
+  create(): number
+  createWithFlags(flags: number): number
+  getInfo(): MachineInfo
+  static createXml(conn: Connection, xml: string, flags: number): Machine
+  static defineXml(conn: Connection, xml: string): Machine
+  static defineXmlFlags(conn: Connection, xml: string, flags: number): Machine
+  destroy(): void
+  reset(): number
+  destroyFlags(flags: number): number
+  shutdown(): number
+  reboot(flags: number): void
+  suspend(): number
+  resume(): number
+  isActive(): boolean
+  undefine(): void
+  undefineFlags(flags: number): void
+  free(): void
+  isUpdated(): boolean
+  getAutostart(): boolean
+  setAutostart(autostart: boolean): boolean
+  setMaxMemory(memory: bigint): boolean
+  getMaxVcpus(): bigint
+  setMemory(memory: bigint): boolean
+  setMemoryFlags(memory: bigint, flags: number): boolean
+  setMemoryStatsPeriod(period: number, flags: number): boolean
+  setVcpus(vcpus: number): boolean
+  setVcpusFlags(vcpus: number, flags: number): boolean
+  static domainRestore(conn: Connection, path: string): void
+  static domainRestoreFlags(conn: Connection, path: string, flags: number): void
+  getVcpusFlags(flags: number): number
+  migrateSetMaxSpeed(bandwidth: bigint, flags: number): number
+  migrateGetMaxSpeed(flags: number): bigint
+  migrateSetCompressionCache(size: bigint, flags: number): number
+  migrateGetCompressionCache(flags: number): bigint
+  migrateSetMaxDowntime(downtime: bigint, flags: number): number
+  setTime(seconds: number, nseconds: number, flags: number): number
+  getTime(flags: number): Time
+  getBlockInfo(disk: string, flags: number): BlockInfo
+  pinVcpu(vcpu: number, cpumap: Uint8Array): number
+  pinVcpuFlags(vcpu: number, cpumap: Uint8Array, flags: number): number
+  pinEmulator(cpumap: Uint8Array, flags: number): number
+  rename(newName: string, flags: number): number
+  setUserPassword(user: string, password: string, flags: number): number
+  setBlockThreshold(dev: string, threshold: bigint, flags: number): number
+  openGraphics(idx: number, fd: number, flags: number): number
+  openGraphicsFd(idx: number, flags: number): number
+}
+export class MachineInfo {
+  /** The running state, one of virDomainState. */
+  state: number
+  /** The maximum memory in KBytes allowed. */
+  maxMem: bigint
+  /** The memory in KBytes used by the domain. */
+  memory: bigint
+  /** The number of virtual CPUs for the domain. */
+  nrVirtCpu: number
+  /** The CPU time used in nanoseconds. */
+  cpuTime: bigint
+}
+export class Time {
+  seconds: number
+  nseconds: number
+}
+export class StateResult {
+  result: number
+  reason: number
+}
+export class BlockInfo {
+  /**
+   * Logical size in bytes of the image (how much storage the guest
+   * will see).
+   */
+  capacity: bigint
+  /**
+   * Host storage in bytes occupied by the image (such as highest
+   * allocated extent if there are no holes, similar to 'du').
+   */
+  allocation: bigint
+  /**
+   * Host physical size in bytes of the image container (last
+   * offset, similar to 'ls')
+   */
+  physical: bigint
 }
 export class Network { }
 export class Interface { }
