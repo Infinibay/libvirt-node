@@ -5,6 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "repository": "git@github.com:infinibay/libvirt-node.git",
+  "author": "Infinibay <andres@infinibay.net> or <andres.b.dev@gmail.com>",
   "license": "MIT",
   "keywords": [
     "napi-rs",
