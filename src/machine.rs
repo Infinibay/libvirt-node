@@ -25,7 +25,7 @@ impl Machine {
     }
 
     #[napi]
-    pub fn from_name(name: String, con: &Connection) -> napi::Result<Self> {
+    pub fn lookup_by_name(name: String, con: &Connection) -> napi::Result<Self> {
         let domain_result = Domain::lookup_by_name(con.get_connection(), &name.to_owned());
         match domain_result {
             Ok(domain) => Ok(Self { domain: domain, con: con.clone() }),

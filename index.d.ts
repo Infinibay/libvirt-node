@@ -51,7 +51,7 @@ export class Connection {
   findStoragePoolSources(kind: string, spec: string, flags: number): string
 }
 export class Machine {
-  static fromName(name: string, con: Connection): this
+  static lookupByName(name: string, con: Connection): this
 }
 export class Network { }
 export class Interface { }
