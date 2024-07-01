@@ -310,7 +310,13 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Connection, Machine } = nativeBinding
+const { Connection, Machine, Network, Interface, NodeDevice, Secret, StoragePool, NwFilter } = nativeBinding
 
 module.exports.Connection = Connection
 module.exports.Machine = Machine
+module.exports.Network = Network
+module.exports.Interface = Interface
+module.exports.NodeDevice = NodeDevice
+module.exports.Secret = Secret
+module.exports.StoragePool = StoragePool
+module.exports.NwFilter = NwFilter

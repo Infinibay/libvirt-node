@@ -159,4 +159,103 @@ impl Connection {
             Err(err) => Err(napi::Error::from_reason(err.to_string()))
         }
     }
+
+    #[napi]
+    pub fn list_all_networks(
+        &self,
+        flags: u32,
+    ) -> napi::Result<Vec<crate::network::Network>> {
+        match self.con.list_all_networks(flags) {
+            Ok(networks) => {
+                let mut network_wrappers = Vec::new();
+                for network in networks {
+                    network_wrappers.push(crate::network::Network::from_network(network));
+                }
+                Ok(network_wrappers)
+            },
+            Err(err) => Err(napi::Error::from_reason(err.to_string()))
+        }
+    }
+
+    #[napi]
+    pub fn list_all_interfaces(
+        &self,
+        flags: u32,
+    ) -> napi::Result<Vec<crate::interface::Interface>> {
+        match self.con.list_all_interfaces(flags) {
+            Ok(interfaces) => {
+                let mut interface_wrappers = Vec::new();
+                for interface in interfaces {
+                    interface_wrappers.push(crate::interface::Interface::from_interface(interface));
+                }
+                Ok(interface_wrappers)
+            },
+            Err(err) => Err(napi::Error::from_reason(err.to_string()))
+        }
+    }
+
+    #[napi]
+    pub fn list_all_node_devices(
+        &self,
+        flags: u32,
+    ) -> napi::Result<Vec<crate::node_device::NodeDevice>> {
+        match self.con.list_all_node_devices(flags) {
+            Ok(node_devices) => {
+                let mut node_device_wrappers = Vec::new();
+                for node_device in node_devices {
+                    node_device_wrappers.push(crate::node_device::NodeDevice::from_node(node_device));
+                }
+                Ok(node_device_wrappers)
+            },
+            Err(err) => Err(napi::Error::from_reason(err.to_string()))
+        }
+    }
+
+    #[napi]
+    pub fn list_all_secrets(
+        &self,
+        flags: u32,
+    ) -> napi::Result<Vec<crate::secret::Secret>> {
+        match self.con.list_all_secrets(flags) {
+            Ok(secrets) => {
+                let mut secret_wrappers = Vec::new();
+                for secret in secrets {
+                    secret_wrappers.push(crate::secret::Secret::from_secret(secret));
+                }
+                Ok(secret_wrappers)
+            },
+            Err(err) => Err(napi::Error::from_reason(err.to_string()))
+        }
+    }
+
+    #[napi]
+    pub fn list_all_storage_pools(
+        &self,
+        flags: u32,
+    ) -> napi::Result<Vec<crate::storage_pool::StoragePool>> {
+        match self.con.list_all_storage_pools(flags) {
+            Ok(storage_pools) => {
+                let mut storage_pool_wrappers = Vec::new();
+                for storage_pool in storage_pools {
+                    storage_pool_wrappers.push(crate::storage_pool::StoragePool::from_storage_pool(storage_pool));
+                }
+                Ok(storage_pool_wrappers)
+            },
+            Err(err) => Err(napi::Error::from_reason(err.to_string()))
+        }
+    }
+
+    #[napi]
+    pub fn list_all_nw_filters(&self, flags: u32) -> napi::Result<Vec<crate::nw_filter::NWFilter>> {
+        match self.con.list_all_nw_filters(flags) {
+            Ok(nw_filters) => {
+                let mut nw_filter_wrappers = Vec::new();
+                for nw_filter in nw_filters {
+                    nw_filter_wrappers.push(crate::nw_filter::NWFilter::from_nw_filter(nw_filter));
+                }
+                Ok(nw_filter_wrappers)
+            },
+            Err(err) => Err(napi::Error::from_reason(err.to_string()))
+        }
+    }
 }

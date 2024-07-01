@@ -18,7 +18,20 @@ export class Connection {
   listSecrets(): Array<string>
   listStoragePools(): Array<string>
   listAllDomains(flags: number): Array<Machine>
+  listAllNetworks(flags: number): Array<Network>
+  listAllInterfaces(flags: number): Array<Interface>
+  listAllNodeDevices(flags: number): Array<NodeDevice>
+  listAllSecrets(flags: number): Array<Secret>
+  listAllStoragePools(flags: number): Array<StoragePool>
+  listAllNwFilters(flags: number): Array<NWFilter>
 }
 export class Machine {
   static fromName(name: string, con: Connection): this
 }
+export class Network { }
+export class Interface { }
+export class NodeDevice { }
+export class Secret { }
+export class StoragePool { }
+export type NWFilter = NwFilter
+export class NwFilter { }
