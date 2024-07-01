@@ -32,10 +32,10 @@ switch (platform) {
   case 'android':
     switch (arch) {
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.android-arm64.node'))
+        localFileExisted = existsSync(join(__dirname, 'libvirt.android-arm64.node'))
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.android-arm64.node')
+            nativeBinding = require('./libvirt.android-arm64.node')
           } else {
             nativeBinding = require('@napi-rs/package-template-android-arm64')
           }
@@ -44,10 +44,10 @@ switch (platform) {
         }
         break
       case 'arm':
-        localFileExisted = existsSync(join(__dirname, 'package-template.android-arm-eabi.node'))
+        localFileExisted = existsSync(join(__dirname, 'libvirt.android-arm-eabi.node'))
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.android-arm-eabi.node')
+            nativeBinding = require('./libvirt.android-arm-eabi.node')
           } else {
             nativeBinding = require('@napi-rs/package-template-android-arm-eabi')
           }
@@ -62,10 +62,12 @@ switch (platform) {
   case 'win32':
     switch (arch) {
       case 'x64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.win32-x64-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.win32-x64-msvc.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.win32-x64-msvc.node')
+            nativeBinding = require('./libvirt.win32-x64-msvc.node')
           } else {
             nativeBinding = require('@napi-rs/package-template-win32-x64-msvc')
           }
@@ -74,10 +76,12 @@ switch (platform) {
         }
         break
       case 'ia32':
-        localFileExisted = existsSync(join(__dirname, 'package-template.win32-ia32-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.win32-ia32-msvc.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.win32-ia32-msvc.node')
+            nativeBinding = require('./libvirt.win32-ia32-msvc.node')
           } else {
             nativeBinding = require('@napi-rs/package-template-win32-ia32-msvc')
           }
@@ -86,10 +90,12 @@ switch (platform) {
         }
         break
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.win32-arm64-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.win32-arm64-msvc.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.win32-arm64-msvc.node')
+            nativeBinding = require('./libvirt.win32-arm64-msvc.node')
           } else {
             nativeBinding = require('@napi-rs/package-template-win32-arm64-msvc')
           }
@@ -102,10 +108,10 @@ switch (platform) {
     }
     break
   case 'darwin':
-    localFileExisted = existsSync(join(__dirname, 'package-template.darwin-universal.node'))
+    localFileExisted = existsSync(join(__dirname, 'libvirt.darwin-universal.node'))
     try {
       if (localFileExisted) {
-        nativeBinding = require('./package-template.darwin-universal.node')
+        nativeBinding = require('./libvirt.darwin-universal.node')
       } else {
         nativeBinding = require('@napi-rs/package-template-darwin-universal')
       }
@@ -113,10 +119,10 @@ switch (platform) {
     } catch {}
     switch (arch) {
       case 'x64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.darwin-x64.node'))
+        localFileExisted = existsSync(join(__dirname, 'libvirt.darwin-x64.node'))
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.darwin-x64.node')
+            nativeBinding = require('./libvirt.darwin-x64.node')
           } else {
             nativeBinding = require('@napi-rs/package-template-darwin-x64')
           }
@@ -125,10 +131,12 @@ switch (platform) {
         }
         break
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'package-template.darwin-arm64.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.darwin-arm64.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.darwin-arm64.node')
+            nativeBinding = require('./libvirt.darwin-arm64.node')
           } else {
             nativeBinding = require('@napi-rs/package-template-darwin-arm64')
           }
@@ -144,10 +152,10 @@ switch (platform) {
     if (arch !== 'x64') {
       throw new Error(`Unsupported architecture on FreeBSD: ${arch}`)
     }
-    localFileExisted = existsSync(join(__dirname, 'package-template.freebsd-x64.node'))
+    localFileExisted = existsSync(join(__dirname, 'libvirt.freebsd-x64.node'))
     try {
       if (localFileExisted) {
-        nativeBinding = require('./package-template.freebsd-x64.node')
+        nativeBinding = require('./libvirt.freebsd-x64.node')
       } else {
         nativeBinding = require('@napi-rs/package-template-freebsd-x64')
       }
@@ -159,10 +167,12 @@ switch (platform) {
     switch (arch) {
       case 'x64':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-x64-musl.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-x64-musl.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-x64-musl.node')
+              nativeBinding = require('./libvirt.linux-x64-musl.node')
             } else {
               nativeBinding = require('@napi-rs/package-template-linux-x64-musl')
             }
@@ -170,10 +180,12 @@ switch (platform) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-x64-gnu.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-x64-gnu.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-x64-gnu.node')
+              nativeBinding = require('./libvirt.linux-x64-gnu.node')
             } else {
               nativeBinding = require('@napi-rs/package-template-linux-x64-gnu')
             }
@@ -184,10 +196,12 @@ switch (platform) {
         break
       case 'arm64':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-arm64-musl.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-arm64-musl.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-arm64-musl.node')
+              nativeBinding = require('./libvirt.linux-arm64-musl.node')
             } else {
               nativeBinding = require('@napi-rs/package-template-linux-arm64-musl')
             }
@@ -195,10 +209,12 @@ switch (platform) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-arm64-gnu.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-arm64-gnu.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-arm64-gnu.node')
+              nativeBinding = require('./libvirt.linux-arm64-gnu.node')
             } else {
               nativeBinding = require('@napi-rs/package-template-linux-arm64-gnu')
             }
@@ -209,10 +225,12 @@ switch (platform) {
         break
       case 'arm':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-arm-musleabihf.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-arm-musleabihf.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-arm-musleabihf.node')
+              nativeBinding = require('./libvirt.linux-arm-musleabihf.node')
             } else {
               nativeBinding = require('@napi-rs/package-template-linux-arm-musleabihf')
             }
@@ -220,10 +238,12 @@ switch (platform) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-arm-gnueabihf.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-arm-gnueabihf.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-arm-gnueabihf.node')
+              nativeBinding = require('./libvirt.linux-arm-gnueabihf.node')
             } else {
               nativeBinding = require('@napi-rs/package-template-linux-arm-gnueabihf')
             }
@@ -234,10 +254,12 @@ switch (platform) {
         break
       case 'riscv64':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-riscv64-musl.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-riscv64-musl.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-riscv64-musl.node')
+              nativeBinding = require('./libvirt.linux-riscv64-musl.node')
             } else {
               nativeBinding = require('@napi-rs/package-template-linux-riscv64-musl')
             }
@@ -245,10 +267,12 @@ switch (platform) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'package-template.linux-riscv64-gnu.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-riscv64-gnu.node')
+          )
           try {
             if (localFileExisted) {
-              nativeBinding = require('./package-template.linux-riscv64-gnu.node')
+              nativeBinding = require('./libvirt.linux-riscv64-gnu.node')
             } else {
               nativeBinding = require('@napi-rs/package-template-linux-riscv64-gnu')
             }
@@ -258,10 +282,12 @@ switch (platform) {
         }
         break
       case 's390x':
-        localFileExisted = existsSync(join(__dirname, 'package-template.linux-s390x-gnu.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.linux-s390x-gnu.node')
+        )
         try {
           if (localFileExisted) {
-            nativeBinding = require('./package-template.linux-s390x-gnu.node')
+            nativeBinding = require('./libvirt.linux-s390x-gnu.node')
           } else {
             nativeBinding = require('@napi-rs/package-template-linux-s390x-gnu')
           }
@@ -284,7 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Machine, Libvirt } = nativeBinding
+const { Connection, Machine } = nativeBinding
 
+module.exports.Connection = Connection
 module.exports.Machine = Machine
-module.exports.Libvirt = Libvirt
