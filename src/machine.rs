@@ -13,12 +13,14 @@ use napi_derive::js_function;
 
 use crate::connection::Connection;
 
+/// Represents a virtual machine.
 #[napi]
 pub struct Machine {
   domain: Domain,
   con: Connection,
 }
 
+/// Contains information about a virtual machine.
 #[napi]
 pub struct MachineInfo {
   /// The running state, one of virDomainState.
@@ -33,18 +35,26 @@ pub struct MachineInfo {
   pub cpu_time: BigInt, // Is u64, but napi does not support it
 }
 
+/// Represents the time structure.
 #[napi]
 pub struct Time {
+  /// The seconds part of the time.
   pub seconds: i64,
+  /// The nanoseconds part of the time.
   pub nseconds: i32,
 }
 
+/// Represents the state result.
+/// Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainState
 #[napi]
 pub struct StateResult {
+  /// The result of the state. 0 if success, 1 if failure.
   pub result: u32,
+  /// The reason of the state. It's a flag, Check libvirt documentation for more info.
   pub reason: i32,
 }
 
+/// Represents the block info.
 #[napi]
 pub struct BlockInfo {
   /// Logical size in bytes of the image (how much storage the guest
@@ -67,6 +77,36 @@ impl Machine {
     }
   }
 
+  /// Looks up a domain by its name.
+  ///
+  /// # Arguments
+  ///
+  /// * `name` - A string slice that holds the name of the domain.
+  /// * `con` - A reference to the Connection object.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(Machine)` - If the domain is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function lookupDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   try {
+  ///     const machine = await Machine.lookupByName('your-domain-name', conn);
+  ///     console.log('Domain found:', machine);
+  ///   } catch (err) {
+  ///     console.error('Error looking up domain:', err);
+  ///   }
+  /// }
+  ///
+  /// lookupDomain();
+  /// ```
   #[napi]
   pub fn lookup_by_name(name: String, con: &Connection) -> napi::Result<Self> {
     let domain_result = Domain::lookup_by_name(con.get_connection(), &name.to_owned());
@@ -79,6 +119,36 @@ impl Machine {
     }
   }
 
+  /// Looks up a domain by its ID.
+  ///
+  /// # Arguments
+  ///
+  /// * `conn` - A reference to the Connection object.
+  /// * `id` - The ID of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(Machine)` - If the domain is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function lookupDomainById() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   try {
+  ///     const machine = await Machine.lookupById(conn, 1); // Replace 1 with your domain ID
+  ///     console.log('Domain found:', machine);
+  ///   } catch (err) {
+  ///     console.error('Error looking up domain by ID:', err);
+  ///   }
+  /// }
+  ///
+  /// lookupDomainById();
+  /// ```
   #[napi]
   pub fn lookup_by_id(conn: &crate::connection::Connection, id: u32) -> napi::Result<Machine> {
     let domain_result = Domain::lookup_by_id(conn.get_connection(), id);
@@ -91,6 +161,36 @@ impl Machine {
     }
   }
 
+  /// Looks up a domain by its UUID.
+  ///
+  /// # Arguments
+  ///
+  /// * `conn` - A reference to the Connection object.
+  /// * `uuid` - The UUID of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(Machine)` - If the domain is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function lookupDomainByUuid() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   try {
+  ///     const machine = await Machine.lookupByUuidString(conn, 'your-domain-uuid');
+  ///     console.log('Domain found:', machine);
+  ///   } catch (err) {
+  ///     console.error('Error looking up domain by UUID:', err);
+  ///   }
+  /// }
+  ///
+  /// lookupDomainByUuid();
+  /// ```
   #[napi]
   pub fn lookup_by_uuid_string(
     conn: &crate::connection::Connection,
@@ -106,6 +206,37 @@ impl Machine {
     }
   }
 
+  /// Get the state of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(StateResult)` - If the state is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  /// const VIR_DOMAIN_RUNNING = 1;
+  ///
+  /// async function getDomainState() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   try {
+  ///     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///     const state = await machine.getState();
+  ///     if (state.result === VIR_DOMAIN_RUNNING) {
+  ///       console.log('Domain is running');
+  ///     } else {
+  ///       console.log('Domain is not running');
+  ///     }
+  ///   } catch (err) {
+  ///     console.error('Error looking up domain by UUID:', err);
+  ///   }
+  /// }
+  ///
+  /// getDomainState();
+  /// ```
   #[napi]
   pub fn get_state(&self) -> napi::Result<StateResult> {
     let state_result = self.domain.get_state();
@@ -118,6 +249,32 @@ impl Machine {
     }
   }
 
+  /// Get the name of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(String)` - If the name is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function getDomainName() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   try {
+  ///     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///     const name = await machine.get_name();
+  ///     console.log('Domain name:', name);
+  ///   } catch (err) {
+  ///     console.error('Error looking up domain by UUID:', err);
+  ///   }
+  /// }
+  ///
+  /// getDomainName();
+  /// ```
   #[napi]
   pub fn get_name(&self) -> napi::Result<String> {
     let name_result = self.domain.get_name();
@@ -127,6 +284,32 @@ impl Machine {
     }
   }
 
+  /// Get the OS type of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(String)` - If the OS type is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function getDomainOsType() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   try {
+  ///     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///     const osType = await machine.getOsType();
+  ///     console.log('Domain OS type:', osType);
+  ///   } catch (err) {
+  ///     console.error('Error looking up domain by UUID:', err);
+  ///   }
+  /// }
+  ///
+  /// getDomainOsType();
+  /// ```
   #[napi]
   pub fn get_os_type(&self) -> napi::Result<String> {
     let os_type_result = self.domain.get_os_type();
@@ -136,6 +319,32 @@ impl Machine {
     }
   }
 
+  /// Get the hostname of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(String)` - If the hostname is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function getDomainHostname() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   try {
+  ///     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///     const hostname = await machine.getHostname();
+  ///     console.log('Domain hostname:', hostname);
+  ///   } catch (err) {
+  ///     console.error('Error looking up domain by UUID:', err);
+  ///   }
+  /// }
+  ///
+  /// getDomainHostname();
+  /// ```
   #[napi]
   pub fn get_hostname(&self, flags: u32) -> napi::Result<String> {
     let hostname_result = self.domain.get_hostname(flags);
@@ -145,6 +354,32 @@ impl Machine {
     }
   }
 
+  /// Get the UUID of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(String)` - If the UUID is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function getDomainUuid() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   try {
+  ///     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///     const uuid = await machine.getUuid();
+  ///     console.log('Domain UUID:', uuid);
+  ///   } catch (err) {
+  ///     console.error('Error looking up domain by name:', err);
+  ///   }
+  /// }
+  ///
+  /// getDomainUuid();
+  /// ```
   #[napi]
   pub fn get_uuid_string(&self) -> napi::Result<String> {
     let uuid_result = self.domain.get_uuid_string();
@@ -154,11 +389,55 @@ impl Machine {
     }
   }
 
+  /// Get the ID of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns an `Option` which is:
+  /// * `Some(u32)` - If the ID is found.
+  /// * `None` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function getDomainId() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   const id = machine.get_id();
+  ///   console.log('Domain ID:', id);
+  /// }
+  ///
+  /// getDomainId();
+  /// ```
   #[napi]
   pub fn get_id(&self) -> Option<u32> {
     self.domain.get_id()
   }
 
+  /// Get the XML description of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(String)` - If the XML description is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function getDomainXml() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   const xml = await machine.getXml();
+  ///   console.log('Domain XML:', xml);
+  /// }
+  ///
+  /// getDomainXml();
+  /// ```
   #[napi]
   pub fn get_xml_desc(&self, flags: u32) -> napi::Result<String> {
     let xml_result = self.domain.get_xml_desc(flags);
@@ -168,6 +447,27 @@ impl Machine {
     }
   }
 
+  /// Create/power-on the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(u32)` - If the domain is created.
+  /// * `Err(napi::Error)` - If there is an error during the creation.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function createDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.create();
+  /// }
+  ///
+  /// createDomain();
+  /// ```
   #[napi]
   pub fn create(&self) -> napi::Result<u32> {
     let id_result = self.domain.create();
@@ -177,6 +477,33 @@ impl Machine {
     }
   }
 
+  /// Create/power-on the domain with flags.
+  /// 
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the creation. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainState
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(u32)` - If the domain is created.
+  /// * `Err(napi::Error)` - If there is an error during the creation.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  /// 
+  /// const VIR_DOMAIN_START_PAUSED = 1;
+  ///
+  /// async function createDomainWithFlags() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.createWithFlags(VIR_DOMAIN_START_PAUSED);
+  /// }
+  ///
+  /// createDomainWithFlags();
+  /// ```
   #[napi]
   pub fn create_with_flags(&self, flags: u32) -> napi::Result<u32> {
     let id_result = self.domain.create_with_flags(flags);
@@ -186,6 +513,28 @@ impl Machine {
     }
   }
 
+  /// Get the information of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(MachineInfo)` - If the information is found.
+  /// * `Err(napi::Error)` - If there is an error during the lookup.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function getDomainInfo() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   const info = await machine.getInfo();
+  ///   console.log('Domain info:', info);
+  /// }
+  ///
+  /// getDomainInfo();
+  /// ```
   #[napi]
   pub fn get_info(&self) -> napi::Result<MachineInfo> {
     let info_result = self.domain.get_info();
@@ -201,6 +550,33 @@ impl Machine {
     }
   }
 
+  /// Create a domain from an XML description.
+  /// 
+  /// # Arguments
+  ///
+  /// * `xml` - The XML description of the domain.
+  /// * `flags` - The flags to use for the creation. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainCreateFlags
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(Machine)` - If the domain is created.
+  /// * `Err(napi::Error)` - If there is an error during the creation.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function createDomainFromXml() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.createXml(conn, 'your-domain-xml', 0);
+  ///   // Now, we can power on the domain
+  ///   await machine.create();
+  /// }
+  ///
+  /// createDomainFromXml();
+  /// ```
   #[napi]
   pub fn create_xml(conn: &Connection, xml: String, flags: u32) -> napi::Result<Machine> {
     let domain_result = Domain::create_xml(conn.get_connection(), &xml, flags);
@@ -213,6 +589,30 @@ impl Machine {
     }
   }
 
+  /// Define a domain from an XML description.
+  ///
+  /// # Arguments
+  ///
+  /// * `xml` - The XML description of the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(Machine)` - If the domain is defined.
+  /// * `Err(napi::Error)` - If there is an error during the definition.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function defineDomainFromXml() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.defineXml(conn, 'your-domain-xml');
+  /// }
+  ///
+  /// defineDomainFromXml();
+  /// ```
   #[napi]
   pub fn define_xml(conn: &Connection, xml: String) -> napi::Result<Machine> {
     let domain_result = Domain::define_xml(conn.get_connection(), &xml);
@@ -225,6 +625,31 @@ impl Machine {
     }
   }
 
+  /// Define a domain from an XML description with flags.
+  ///
+  /// # Arguments
+  ///
+  /// * `xml` - The XML description of the domain.
+  /// * `flags` - The flags to use for the definition. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainCreateFlags
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(Machine)` - If the domain is defined.
+  /// * `Err(napi::Error)` - If there is an error during the definition.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function defineDomainFromXml() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.defineXml(conn, 'your-domain-xml');
+  /// }
+  ///
+  /// defineDomainFromXml();
+  /// ```
   #[napi]
   pub fn define_xml_flags(conn: &Connection, xml: String, flags: u32) -> napi::Result<Machine> {
     let domain_result = Domain::define_xml_flags(conn.get_connection(), &xml, flags);
@@ -237,6 +662,27 @@ impl Machine {
     }
   }
 
+  /// Destroy/power-off the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(())` - If the domain is destroyed.
+  /// * `Err(napi::Error)` - If there is an error during the destruction.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function destroyDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.destroy();
+  /// }
+  ///
+  /// destroyDomain();
+  /// ```
   #[napi]
   pub fn destroy(&self) -> napi::Result<()> {
     let result = self.domain.destroy();
@@ -246,6 +692,27 @@ impl Machine {
     }
   }
 
+  /// Reset the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(u32)` - If the domain is reset.
+  /// * `Err(napi::Error)` - If there is an error during the reset.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function resetDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.reset();
+  /// }
+  ///
+  /// resetDomain();
+  /// ```
   #[napi]
   pub fn reset(&self) -> napi::Result<u32> {
     let result = self.domain.reset();
@@ -255,6 +722,33 @@ impl Machine {
     }
   }
 
+  /// Destroy/power-off the domain with flags.
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the destruction. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainDestroyFlags
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(u32)` - If the domain is destroyed.
+  /// * `Err(napi::Error)` - If there is an error during the destruction.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  /// 
+  /// VIR_DOMAIN_DESTROY_GRACEFUL = 1 (0x1; 1 << 0)
+  ///
+  /// async function destroyDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.destroyFlags(VIR_DOMAIN_DESTROY_GRACEFUL);
+  /// }
+  ///
+  /// destroyDomain();
+  /// ```
   #[napi]
   pub fn destroy_flags(&self, flags: u32) -> napi::Result<u32> {
     let result = self.domain.destroy_flags(flags);
@@ -264,6 +758,27 @@ impl Machine {
     }
   }
 
+  /// Shutdown the domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(u32)` - If the domain is shutdown.
+  /// * `Err(napi::Error)` - If there is an error during the shutdown.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function shutdownDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.shutdown();
+  /// }
+  ///
+  /// shutdownDomain();
+  /// ```
   #[napi]
   pub fn shutdown(&self) -> napi::Result<u32> {
     let result = self.domain.shutdown();
@@ -273,6 +788,34 @@ impl Machine {
     }
   }
 
+  /// Reboot the domain with flags.
+  /// Useful if you want to send ACPI events to the domain.
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the reboot. Check virDomainRebootFlagValues
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(())` - If the domain is rebooted.
+  /// * `Err(napi::Error)` - If there is an error during the reboot.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  /// 
+  /// const VIR_DOMAIN_REBOOT_ACPI_POWER_BTN = 1 (0x1; 1 << 1)
+  ///
+  /// async function rebootDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.reboot(VIR_DOMAIN_REBOOT_ACPI_POWER_BTN);
+  /// }
+  ///
+  /// rebootDomain();
+  /// ```
   #[napi]
   pub fn reboot(&self, flags: u32) -> napi::Result<()> {
     let result = self.domain.reboot(flags);
@@ -282,6 +825,30 @@ impl Machine {
     }
   }
 
+  /// Suspend the domain.
+  /// When machine is suspended, the process is frozen without further access to 
+  /// CPU resources and I/O but the memory used by the domain at the hypervisor level 
+  /// will stay allocated. 
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(u32)` - If the domain is suspended.
+  /// * `Err(napi::Error)` - If there is an error during the suspension.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function suspendDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.suspend();
+  /// }
+  ///
+  /// suspendDomain();
+  /// ```
   #[napi]
   pub fn suspend(&self) -> napi::Result<u32> {
     let result = self.domain.suspend();
@@ -291,6 +858,27 @@ impl Machine {
     }
   }
 
+  /// Resume the suspended domain.
+  ///
+  /// # Returns
+  ///
+  /// This function returns a `Result` which is:
+  /// * `Ok(u32)` - If the domain is resumed.
+  /// * `Err(napi::Error)` - If there is an error during the resumption.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Connection, Machine } = require('your-node-package');
+  ///
+  /// async function resumeDomain() {
+  ///   const conn = Connection.open('quemu:///system');
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   await machine.resume();
+  /// }
+  ///
+  /// resumeDomain();
+  /// ```
   #[napi]
   pub fn resume(&self) -> napi::Result<u32> {
     let result = self.domain.resume();
@@ -365,7 +953,10 @@ impl Machine {
 
   #[napi]
   pub fn set_max_memory(&self, memory: BigInt) -> napi::Result<bool> {
-    let memory_u64: u64 = memory.get_u64().1; // WARNING we are ignoring signed overflow here
+    let (signed, memory_u64, lossless) = memory.get_u64();
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
     let result = self.domain.set_max_memory(memory_u64);
     match result {
       Ok(result) => Ok(result),
@@ -384,7 +975,10 @@ impl Machine {
 
   #[napi]
   pub fn set_memory(&self, memory: BigInt) -> napi::Result<bool> {
-    let memory_u64: u64 = memory.get_u64().1; // WARNING we are ignoring signed overflow here
+    let (signed, memory_u64, lossless) = memory.get_u64();
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
     let result = self.domain.set_memory(memory_u64);
     match result {
       Ok(result) => Ok(result),
@@ -394,7 +988,10 @@ impl Machine {
 
   #[napi]
   pub fn set_memory_flags(&self, memory: BigInt, flags: u32) -> napi::Result<bool> {
-    let memory_u64: u64 = memory.get_u64().1; // WARNING we are ignoring signed overflow here
+    let (signed, memory_u64, lossless) = memory.get_u64();
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
     let result = self.domain.set_memory_flags(memory_u64, flags);
     match result {
       Ok(result) => Ok(result),
@@ -458,7 +1055,10 @@ impl Machine {
 
   #[napi]
   pub fn migrate_set_max_speed(&self, bandwidth: BigInt, flags: u32) -> napi::Result<u32> {
-    let bandwidth_u64: u64 = bandwidth.get_u64().1; // WARNING we are ignoring signed overflow here
+    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
     let result = self.domain.migrate_set_max_speed(bandwidth_u64, flags);
     match result {
       Ok(result) => Ok(result),
@@ -477,7 +1077,10 @@ impl Machine {
 
   #[napi]
   pub fn migrate_set_compression_cache(&self, size: BigInt, flags: u32) -> napi::Result<u32> {
-    let size_u64: u64 = size.get_u64().1; // WARNING we are ignoring signed overflow here
+    let (signed, size_u64, lossless) = size.get_u64();
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
     let result = self.domain.migrate_set_compression_cache(size_u64, flags);
     match result {
       Ok(result) => Ok(result),
@@ -496,7 +1099,10 @@ impl Machine {
 
   #[napi]
   pub fn migrate_set_max_downtime(&self, downtime: BigInt, flags: u32) -> napi::Result<u32> {
-    let downtime_u64: u64 = downtime.get_u64().1; // WARNING we are ignoring signed overflow here
+    let (signed, downtime_u64, lossless) = downtime.get_u64();
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
     let result = self.domain.migrate_set_max_downtime(downtime_u64, flags);
     match result {
       Ok(result) => Ok(result),
@@ -585,7 +1191,10 @@ impl Machine {
 
   #[napi]
   pub fn set_block_threshold(&self, dev: String, threshold: BigInt, flags: u32) -> napi::Result<u32> {
-    let threshold_u64: u64 = threshold.get_u64().1; // WARNING we are ignoring signed overflow here
+    let (signed, threshold_u64, lossless) = threshold.get_u64();
+    if (!lossless) {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
     let result = self.domain.set_block_threshold(&dev, threshold_u64, flags);
     match result {
       Ok(result) => Ok(result),

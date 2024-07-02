@@ -50,29 +50,654 @@ export class Connection {
   baselineCpu(xmlcpus: Array<string>, flags: number): string
   findStoragePoolSources(kind: string, spec: string, flags: number): string
 }
+/** Represents a virtual machine. */
 export class Machine {
+  /**
+   * Looks up a domain by its name.
+   *
+   * # Arguments
+   *
+   * * `name` - A string slice that holds the name of the domain.
+   * * `con` - A reference to the Connection object.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(Machine)` - If the domain is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function lookupDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupByName('your-domain-name', conn);
+   *     console.log('Domain found:', machine);
+   *   } catch (err) {
+   *     console.error('Error looking up domain:', err);
+   *   }
+   * }
+   *
+   * lookupDomain();
+   * ```
+   */
   static lookupByName(name: string, con: Connection): this
+  /**
+   * Looks up a domain by its ID.
+   *
+   * # Arguments
+   *
+   * * `conn` - A reference to the Connection object.
+   * * `id` - The ID of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(Machine)` - If the domain is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function lookupDomainById() {
+   *   const conn = Connection.open('quemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupById(conn, 1); // Replace 1 with your domain ID
+   *     console.log('Domain found:', machine);
+   *   } catch (err) {
+   *     console.error('Error looking up domain by ID:', err);
+   *   }
+   * }
+   *
+   * lookupDomainById();
+   * ```
+   */
   static lookupById(conn: Connection, id: number): Machine
+  /**
+   * Looks up a domain by its UUID.
+   *
+   * # Arguments
+   *
+   * * `conn` - A reference to the Connection object.
+   * * `uuid` - The UUID of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(Machine)` - If the domain is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function lookupDomainByUuid() {
+   *   const conn = Connection.open('quemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupByUuidString(conn, 'your-domain-uuid');
+   *     console.log('Domain found:', machine);
+   *   } catch (err) {
+   *     console.error('Error looking up domain by UUID:', err);
+   *   }
+   * }
+   *
+   * lookupDomainByUuid();
+   * ```
+   */
   static lookupByUuidString(conn: Connection, uuid: string): Machine
+  /**
+   * Get the state of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(StateResult)` - If the state is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   * const VIR_DOMAIN_RUNNING = 1;
+   *
+   * async function getDomainState() {
+   *   const conn = Connection.open('quemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *     const state = await machine.getState();
+   *     if (state.result === VIR_DOMAIN_RUNNING) {
+   *       console.log('Domain is running');
+   *     } else {
+   *       console.log('Domain is not running');
+   *     }
+   *   } catch (err) {
+   *     console.error('Error looking up domain by UUID:', err);
+   *   }
+   * }
+   *
+   * getDomainState();
+   * ```
+   */
   getState(): StateResult
+  /**
+   * Get the name of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(String)` - If the name is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function getDomainName() {
+   *   const conn = Connection.open('quemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *     const name = await machine.get_name();
+   *     console.log('Domain name:', name);
+   *   } catch (err) {
+   *     console.error('Error looking up domain by UUID:', err);
+   *   }
+   * }
+   *
+   * getDomainName();
+   * ```
+   */
   getName(): string
+  /**
+   * Get the OS type of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(String)` - If the OS type is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function getDomainOsType() {
+   *   const conn = Connection.open('quemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *     const osType = await machine.getOsType();
+   *     console.log('Domain OS type:', osType);
+   *   } catch (err) {
+   *     console.error('Error looking up domain by UUID:', err);
+   *   }
+   * }
+   *
+   * getDomainOsType();
+   * ```
+   */
   getOsType(): string
+  /**
+   * Get the hostname of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(String)` - If the hostname is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function getDomainHostname() {
+   *   const conn = Connection.open('quemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *     const hostname = await machine.getHostname();
+   *     console.log('Domain hostname:', hostname);
+   *   } catch (err) {
+   *     console.error('Error looking up domain by UUID:', err);
+   *   }
+   * }
+   *
+   * getDomainHostname();
+   * ```
+   */
   getHostname(flags: number): string
+  /**
+   * Get the UUID of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(String)` - If the UUID is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function getDomainUuid() {
+   *   const conn = Connection.open('quemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *     const uuid = await machine.getUuid();
+   *     console.log('Domain UUID:', uuid);
+   *   } catch (err) {
+   *     console.error('Error looking up domain by name:', err);
+   *   }
+   * }
+   *
+   * getDomainUuid();
+   * ```
+   */
   getUuidString(): string
+  /**
+   * Get the ID of the domain.
+   *
+   * # Returns
+   *
+   * This function returns an `Option` which is:
+   * * `Some(u32)` - If the ID is found.
+   * * `None` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function getDomainId() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const id = machine.get_id();
+   *   console.log('Domain ID:', id);
+   * }
+   *
+   * getDomainId();
+   * ```
+   */
   getId(): number | null
+  /**
+   * Get the XML description of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(String)` - If the XML description is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function getDomainXml() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const xml = await machine.getXml();
+   *   console.log('Domain XML:', xml);
+   * }
+   *
+   * getDomainXml();
+   * ```
+   */
   getXmlDesc(flags: number): string
+  /**
+   * Create/power-on the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(u32)` - If the domain is created.
+   * * `Err(napi::Error)` - If there is an error during the creation.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function createDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.create();
+   * }
+   *
+   * createDomain();
+   * ```
+   */
   create(): number
+  /**
+   * Create/power-on the domain with flags.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the creation. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainState
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(u32)` - If the domain is created.
+   * * `Err(napi::Error)` - If there is an error during the creation.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * const VIR_DOMAIN_START_PAUSED = 1;
+   *
+   * async function createDomainWithFlags() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.createWithFlags(VIR_DOMAIN_START_PAUSED);
+   * }
+   *
+   * createDomainWithFlags();
+   * ```
+   */
   createWithFlags(flags: number): number
+  /**
+   * Get the information of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(MachineInfo)` - If the information is found.
+   * * `Err(napi::Error)` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function getDomainInfo() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const info = await machine.getInfo();
+   *   console.log('Domain info:', info);
+   * }
+   *
+   * getDomainInfo();
+   * ```
+   */
   getInfo(): MachineInfo
+  /**
+   * Create a domain from an XML description.
+   *
+   * # Arguments
+   *
+   * * `xml` - The XML description of the domain.
+   * * `flags` - The flags to use for the creation. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainCreateFlags
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(Machine)` - If the domain is created.
+   * * `Err(napi::Error)` - If there is an error during the creation.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function createDomainFromXml() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.createXml(conn, 'your-domain-xml', 0);
+   *   // Now, we can power on the domain
+   *   await machine.create();
+   * }
+   *
+   * createDomainFromXml();
+   * ```
+   */
   static createXml(conn: Connection, xml: string, flags: number): Machine
+  /**
+   * Define a domain from an XML description.
+   *
+   * # Arguments
+   *
+   * * `xml` - The XML description of the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(Machine)` - If the domain is defined.
+   * * `Err(napi::Error)` - If there is an error during the definition.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function defineDomainFromXml() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.defineXml(conn, 'your-domain-xml');
+   * }
+   *
+   * defineDomainFromXml();
+   * ```
+   */
   static defineXml(conn: Connection, xml: string): Machine
+  /**
+   * Define a domain from an XML description with flags.
+   *
+   * # Arguments
+   *
+   * * `xml` - The XML description of the domain.
+   * * `flags` - The flags to use for the definition. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainCreateFlags
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(Machine)` - If the domain is defined.
+   * * `Err(napi::Error)` - If there is an error during the definition.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function defineDomainFromXml() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.defineXml(conn, 'your-domain-xml');
+   * }
+   *
+   * defineDomainFromXml();
+   * ```
+   */
   static defineXmlFlags(conn: Connection, xml: string, flags: number): Machine
+  /**
+   * Destroy/power-off the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(())` - If the domain is destroyed.
+   * * `Err(napi::Error)` - If there is an error during the destruction.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function destroyDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.destroy();
+   * }
+   *
+   * destroyDomain();
+   * ```
+   */
   destroy(): void
+  /**
+   * Reset the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(u32)` - If the domain is reset.
+   * * `Err(napi::Error)` - If there is an error during the reset.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function resetDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.reset();
+   * }
+   *
+   * resetDomain();
+   * ```
+   */
   reset(): number
+  /**
+   * Destroy/power-off the domain with flags.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the destruction. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainDestroyFlags
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(u32)` - If the domain is destroyed.
+   * * `Err(napi::Error)` - If there is an error during the destruction.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * VIR_DOMAIN_DESTROY_GRACEFUL = 1 (0x1; 1 << 0)
+   *
+   * async function destroyDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.destroyFlags(VIR_DOMAIN_DESTROY_GRACEFUL);
+   * }
+   *
+   * destroyDomain();
+   * ```
+   */
   destroyFlags(flags: number): number
+  /**
+   * Shutdown the domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(u32)` - If the domain is shutdown.
+   * * `Err(napi::Error)` - If there is an error during the shutdown.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function shutdownDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.shutdown();
+   * }
+   *
+   * shutdownDomain();
+   * ```
+   */
   shutdown(): number
+  /**
+   * Reboot the domain with flags.
+   * Useful if you want to send ACPI events to the domain.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the reboot. Check virDomainRebootFlagValues
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(())` - If the domain is rebooted.
+   * * `Err(napi::Error)` - If there is an error during the reboot.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * const VIR_DOMAIN_REBOOT_ACPI_POWER_BTN = 1 (0x1; 1 << 1)
+   *
+   * async function rebootDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.reboot(VIR_DOMAIN_REBOOT_ACPI_POWER_BTN);
+   * }
+   *
+   * rebootDomain();
+   * ```
+   */
   reboot(flags: number): void
+  /**
+   * Suspend the domain.
+   * When machine is suspended, the process is frozen without further access to
+   * CPU resources and I/O but the memory used by the domain at the hypervisor level
+   * will stay allocated.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(u32)` - If the domain is suspended.
+   * * `Err(napi::Error)` - If there is an error during the suspension.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function suspendDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.suspend();
+   * }
+   *
+   * suspendDomain();
+   * ```
+   */
   suspend(): number
+  /**
+   * Resume the suspended domain.
+   *
+   * # Returns
+   *
+   * This function returns a `Result` which is:
+   * * `Ok(u32)` - If the domain is resumed.
+   * * `Err(napi::Error)` - If there is an error during the resumption.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Connection, Machine } = require('your-node-package');
+   *
+   * async function resumeDomain() {
+   *   const conn = Connection.open('quemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   await machine.resume();
+   * }
+   *
+   * resumeDomain();
+   * ```
+   */
   resume(): number
   isActive(): boolean
   undefine(): void
@@ -108,6 +733,7 @@ export class Machine {
   openGraphics(idx: number, fd: number, flags: number): number
   openGraphicsFd(idx: number, flags: number): number
 }
+/** Contains information about a virtual machine. */
 export class MachineInfo {
   /** The running state, one of virDomainState. */
   state: number
@@ -120,14 +746,24 @@ export class MachineInfo {
   /** The CPU time used in nanoseconds. */
   cpuTime: bigint
 }
+/** Represents the time structure. */
 export class Time {
+  /** The seconds part of the time. */
   seconds: number
+  /** The nanoseconds part of the time. */
   nseconds: number
 }
+/**
+ * Represents the state result.
+ * Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainState
+ */
 export class StateResult {
+  /** The result of the state. 0 if success, 1 if failure. */
   result: number
+  /** The reason of the state. It's a flag, Check libvirt documentation for more info. */
   reason: number
 }
+/** Represents the block info. */
 export class BlockInfo {
   /**
    * Logical size in bytes of the image (how much storage the guest
