@@ -732,6 +732,31 @@ export class Machine {
   setBlockThreshold(dev: string, threshold: bigint, flags: number): number
   openGraphics(idx: number, fd: number, flags: number): number
   openGraphicsFd(idx: number, flags: number): number
+  interfaceStats(path: string): InterfaceStats
+  memoryStats(flags: number): Array<MemoryStat>
+  static saveImageGetXmlDesc(conn: Connection, file: string, flags: number): string
+  static saveImageDefineXml(conn: Connection, file: string, dxml: string, flags: number): number
+  attachDevice(xml: string): number
+  attachDeviceFlags(xml: string, flags: number): number
+  detachDevice(xml: string): number
+  detachDeviceFlags(xml: string, flags: number): number
+  updateDeviceFlags(xml: string, flags: number): number
+  managedSave(flags: number): number
+  hasManagedSave(flags: number): boolean
+  managedSaveRemove(flags: number): number
+  coreDump(to: string, flags: number): number
+  coreDumpWithFormat(to: string, format: number, flags: number): number
+  setMetadata(kind: number, metadata: string, key: string, uri: string, flags: number): number
+  getMetadata(kind: number, uri: string, flags: number): string
+  blockResize(disk: string, size: bigint, flags: number): number
+  getMemoryParameters(flags: number): MemoryParameters
+  setMemoryParameters(params: MemoryParameters, flags: number): number
+  migrate(dconn: Connection, flags: number, uri: string, bandwidth: bigint): this
+  migrateWithXml(dconn: Connection, dxml: string, flags: number, uri: string, bandwidth: bigint): this
+  migrateToUri(uri: string, flags: number, bandwidth: bigint): number
+  migrateToUriWithXml(dconnUri: string, migUri: string, dxml: string, flags: number, bandwidth: bigint): number
+  getNumaParameters(flags: number): NumaParameters
+  setNumaParameters(params: NumaParameters, flags: number): number
 }
 /** Contains information about a virtual machine. */
 export class MachineInfo {
@@ -780,6 +805,46 @@ export class BlockInfo {
    * offset, similar to 'ls')
    */
   physical: bigint
+}
+export class InterfaceStats {
+  rxBytes: number
+  rxPackets: number
+  rxErrs: number
+  rxDrop: number
+  txBytes: number
+  txPackets: number
+  txErrs: number
+  txDrop: number
+}
+export class MemoryStat {
+  tag: number
+  val: bigint
+}
+export type NUMAParameters = NumaParameters
+export class NumaParameters {
+  /** Lists the numa nodeset of a domain. */
+  nodeSet?: string
+  /**
+   * Numa mode of a domain, as an int containing a
+   * DomainNumatuneMemMode value.
+   */
+  mode?: number
+}
+export class MemoryParameters {
+  /** Represents the maximum memory the guest can use. */
+  hardLimit?: bigint
+  /**
+   * Represents the memory upper limit enforced during memory
+   * contention.
+   */
+  softLimit?: bigint
+  /**
+   * Represents the minimum memory guaranteed to be reserved for
+   * the guest.
+   */
+  minGuarantee?: bigint
+  /** Represents the maximum swap plus memory the guest can use. */
+  swapHardLimit?: bigint
 }
 export class Network { }
 export class Interface { }

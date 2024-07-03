@@ -310,7 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, Network, Interface, NodeDevice, Secret, StoragePool, NwFilter, NodeInfo, DomainStatsRecord } = nativeBinding
+const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, NwFilter, NodeInfo, DomainStatsRecord } = nativeBinding
 
 module.exports.Connection = Connection
 module.exports.Machine = Machine
@@ -318,6 +318,10 @@ module.exports.MachineInfo = MachineInfo
 module.exports.Time = Time
 module.exports.StateResult = StateResult
 module.exports.BlockInfo = BlockInfo
+module.exports.InterfaceStats = InterfaceStats
+module.exports.MemoryStat = MemoryStat
+module.exports.NumaParameters = NumaParameters
+module.exports.MemoryParameters = MemoryParameters
 module.exports.Network = Network
 module.exports.Interface = Interface
 module.exports.NodeDevice = NodeDevice

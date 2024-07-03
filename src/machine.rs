@@ -69,6 +69,74 @@ pub struct BlockInfo {
 }
 
 #[napi]
+pub struct InterfaceStats {
+  pub rx_bytes: i64,
+  pub rx_packets: i64,
+  pub rx_errs: i64,
+  pub rx_drop: i64,
+  pub tx_bytes: i64,
+  pub tx_packets: i64,
+  pub tx_errs: i64,
+  pub tx_drop: i64,
+}
+
+#[napi]
+pub struct MemoryStat {
+  pub tag: u32,
+  pub val: BigInt,
+}
+
+#[derive(Clone, Debug, Default)]
+#[napi]
+pub struct NUMAParameters {
+    /// Lists the numa nodeset of a domain.
+    pub node_set: Option<String>,
+    /// Numa mode of a domain, as an int containing a
+    /// DomainNumatuneMemMode value.
+    pub mode: Option<u32>,
+}
+
+#[napi]
+pub struct MemoryParameters {
+    /// Represents the maximum memory the guest can use.
+    pub hard_limit: Option<BigInt>,
+    /// Represents the memory upper limit enforced during memory
+    /// contention.
+    pub soft_limit: Option<BigInt>,
+    /// Represents the minimum memory guaranteed to be reserved for
+    /// the guest.
+    pub min_guarantee: Option<BigInt>,
+    /// Represents the maximum swap plus memory the guest can use.
+    pub swap_hard_limit: Option<BigInt>,
+}
+
+impl FromNapiValue for MemoryParameters {
+  unsafe fn from_napi_value(env: sys::napi_env, napi_val: sys::napi_value) -> Result<Self> {    
+    let obj = JsObject::from_napi_value(env, napi_val)?;
+    let hard_limit: Option<BigInt> = obj.get("hardLimit")?;
+    let soft_limit: Option<BigInt> = obj.get("softLimit")?;
+    let min_guarantee: Option<BigInt> = obj.get("minGuarantee")?;
+    let swap_hard_limit: Option<BigInt> = obj.get("swapHardLimit")?;
+
+    Ok(Self {
+      hard_limit,
+      soft_limit,
+      min_guarantee,
+      swap_hard_limit,
+    })
+  }
+}
+
+impl FromNapiValue for NUMAParameters {
+  unsafe fn from_napi_value(env: sys::napi_env, napi_val: sys::napi_value) -> Result<Self> {
+    let obj = JsObject::from_napi_value(env, napi_val)?;
+    let node_set: Option<String> = obj.get("nodeSet")?;
+    let mode: Option<u32> = obj.get("mode")?;
+    Ok(Self { node_set, mode })
+  }
+}
+
+#[napi]
 impl Machine {
   pub fn from_domain(domain: Domain, con: &Connection) -> Self {
     Self {
@@ -1232,6 +1300,340 @@ impl Machine {
 //     source: u32,
 //     flags: u32,
 //   ) -> napi::Result<Vec<crate::interface::Interface>> {
+  
+  #[napi]
+  pub fn interface_stats(&self, path: String) -> napi::Result<InterfaceStats> {
+    let result = self.domain.interface_stats(&path);
+    match result {
+      Ok(stats) => Ok(InterfaceStats {
+        rx_bytes: stats.rx_bytes,
+        rx_packets: stats.rx_packets,
+        rx_errs: stats.rx_errs,
+        rx_drop: stats.rx_drop,
+        tx_bytes: stats.tx_bytes,
+        tx_packets: stats.tx_packets,
+        tx_errs: stats.tx_errs,
+        tx_drop: stats.tx_drop,
+      }),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
 
-    
+  #[napi]
+  pub fn memory_stats(&self, flags: u32) -> napi::Result<Vec<MemoryStat>> {
+    let result = self.domain.memory_stats(flags);
+    match result {
+      Ok(stats) => {
+        let mut memory_stats = Vec::new();
+        for stat in stats {
+          memory_stats.push(MemoryStat {
+            tag: stat.tag,
+            val: stat.val.into(),
+          });
+        }
+        Ok(memory_stats)
+      },
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn save_image_get_xml_desc(
+    conn: &Connection,
+    file: String,
+    flags: u32,
+  ) -> napi::Result<String> {
+    let result = Domain::save_image_get_xml_desc(conn.get_connection(), &file, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn save_image_define_xml(
+    conn: &Connection,
+    file: String,
+    dxml: String,
+    flags: u32,
+  ) -> napi::Result<u32> {
+    let result = Domain::save_image_define_xml(conn.get_connection(), &file, &dxml, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn attach_device(&self, xml: String) -> napi::Result<u32> {
+    let result = self.domain.attach_device(&xml);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn attach_device_flags(&self, xml: String, flags: u32) -> napi::Result<u32> {
+    let result = self.domain.attach_device_flags(&xml, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn detach_device(&self, xml: String) -> napi::Result<u32> {
+    let result = self.domain.detach_device(&xml);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn detach_device_flags(&self, xml: String, flags: u32) -> napi::Result<u32> {
+    let result = self.domain.detach_device_flags(&xml, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn update_device_flags(&self, xml: String, flags: u32) -> napi::Result<u32> {
+    let result = self.domain.update_device_flags(&xml, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn managed_save(&self, flags: u32) -> napi::Result<u32> {
+    let result = self.domain.managed_save(flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn has_managed_save(&self, flags: u32) -> napi::Result<bool> {
+    let result = self.domain.has_managed_save(flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn managed_save_remove(&self, flags: u32) -> napi::Result<u32> {
+    let result = self.domain.managed_save_remove(flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn core_dump(&self, to: String, flags: u32) -> napi::Result<u32> {
+    let result = self.domain.core_dump(&to, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn core_dump_with_format(&self, to: String, format: u32, flags: u32) -> napi::Result<u32> {
+    let result = self.domain.core_dump_with_format(&to, format, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn set_metadata(
+    &self,
+    kind: i32,
+    metadata: String,
+    key: String,
+    uri: String,
+    flags: u32,
+  ) -> napi::Result<u32> {
+    let result = self.domain.set_metadata(kind, &metadata, &key, &uri, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn get_metadata(&self, kind: i32, uri: String, flags: u32) -> napi::Result<String> {
+    let result = self.domain.get_metadata(kind, &uri, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn block_resize(&self, disk: String, size: BigInt, flags: u32) -> napi::Result<u32> {
+    let (signed, size_u64, lossless) = size.get_u64();
+    if (!lossless) {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
+    let result = self.domain.block_resize(&disk, size_u64, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+ #[napi]
+ pub fn get_memory_parameters(&self, flags: u32) -> napi::Result<MemoryParameters> {
+    let result = self.domain.get_memory_parameters(flags);
+    match result {
+      Ok(result) => Ok(MemoryParameters {
+        hard_limit: result.hard_limit.map(|v| BigInt::from(v)),
+        soft_limit: result.soft_limit.map(|v| BigInt::from(v)),
+        min_guarantee: result.min_guarantee.map(|v| BigInt::from(v)),
+        swap_hard_limit: result.swap_hard_limit.map(|v| BigInt::from(v)),
+      }),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+ }
+
+ #[napi]
+ pub fn set_memory_parameters(
+  &self,
+  params: crate::machine::MemoryParameters,
+  flags: u32,
+ ) -> napi::Result<u32> {
+    // TODO: Check params overflow, it should be u64 but BigInt is used because u64 is not supported by N-API
+    let mem_param: virt::domain::MemoryParameters = virt::domain::MemoryParameters {
+      hard_limit: params.hard_limit.map(|v| v.get_u64().1),
+      soft_limit: params.soft_limit.map(|v| v.get_u64().1),
+      min_guarantee: params.min_guarantee.map(|v| v.get_u64().1),
+      swap_hard_limit: params.swap_hard_limit.map(|v| v.get_u64().1),
+    };
+    let result = self.domain.set_memory_parameters(mem_param, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn migrate(
+    &self,
+    dconn: &Connection,
+    flags: u32,
+    uri: String,
+    bandwidth: BigInt,
+  ) -> napi::Result<Self> {
+    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
+    if signed {
+      return Err(napi::Error::from_reason("Bandwidth cannot be negative".to_string()));
+    }
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
+    let result = self.domain.migrate(dconn.get_connection(), flags, &uri, bandwidth_u64);
+    match result {
+      Ok(result) => Ok(Machine::from_domain(result, &dconn)),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  // Renamed, originally called migrate2
+  #[napi]
+  pub fn migrate_with_xml(
+    &self,
+    dconn: &Connection,
+    dxml: String,
+    flags: u32,
+    uri: String,
+    bandwidth: BigInt,
+  ) -> napi::Result<Self> {
+    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
+    if signed {
+      return Err(napi::Error::from_reason("Bandwidth cannot be negative".to_string()));
+    }
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
+    let result = self.domain.migrate2(dconn.get_connection(), &dxml, flags, &uri, bandwidth_u64);
+    match result {
+      Ok(result) => Ok(Machine::from_domain(result, &dconn)),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn migrate_to_uri(&self, uri: String, flags: u32, bandwidth: BigInt) -> napi::Result<u32> {
+    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
+    if signed {
+      return Err(napi::Error::from_reason("Bandwidth cannot be negative".to_string()));
+    }
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
+    let result = self.domain.migrate_to_uri(&uri, flags, bandwidth_u64);
+    match result {
+      Ok(_) => Ok(0),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  // Renamed, originally called migrate_to_uri2
+  #[napi]
+  pub fn migrate_to_uri_with_xml(
+    &self,
+    dconn_uri: String,
+    mig_uri: String,
+    dxml: String,
+    flags: u32,
+    bandwidth: BigInt,
+  ) -> napi::Result<u32> {
+    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
+    if signed {
+      return Err(napi::Error::from_reason("Bandwidth cannot be negative".to_string()));
+    }
+    if !lossless {
+      return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
+    }
+    let result = self.domain.migrate_to_uri2(&dconn_uri, &mig_uri, &dxml, flags, bandwidth_u64);
+    match result {
+      Ok(_) => Ok(0),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn get_numa_parameters(&self, flags: u32) -> napi::Result<crate::machine::NUMAParameters> {
+    let result = self.domain.get_numa_parameters(flags);
+    match result {
+      Ok(result) => Ok(NUMAParameters {
+        node_set: result.node_set.map(|v| v.to_string()),
+        mode: result.mode.map(|v| v.into()),
+      }),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
+  #[napi]
+  pub fn set_numa_parameters(&self, params: crate::machine::NUMAParameters, flags: u32) -> napi::Result<u32> {
+    let params: virt::domain::NUMAParameters = virt::domain::NUMAParameters {
+      node_set: params.node_set.map(|v| v.to_string()),
+      mode: params.mode.map(|v| v.into()),
+    };
+    let result = self.domain.set_numa_parameters(params, flags);
+    match result {
+      Ok(result) => Ok(result),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
 }
