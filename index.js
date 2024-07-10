@@ -310,7 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, NwFilter, NodeInfo, DomainStatsRecord } = nativeBinding
+const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, NwFilter, NodeInfo, DomainStatsRecord, VirDomainGetHostnameFlags, VirDomainXMLFlags, VirDomainCreateFlags, VirDomainDefineFlags, VirDomainDestroyFlags, VirDomainRebootFlag, VirDomainUndefineFlags, VirDomainModificationImpact, VirDomainMemoryModFlags } = nativeBinding
 
 module.exports.Connection = Connection
 module.exports.Machine = Machine
@@ -330,3 +330,12 @@ module.exports.StoragePool = StoragePool
 module.exports.NwFilter = NwFilter
 module.exports.NodeInfo = NodeInfo
 module.exports.DomainStatsRecord = DomainStatsRecord
+module.exports.VirDomainGetHostnameFlags = VirDomainGetHostnameFlags
+module.exports.VirDomainXMLFlags = VirDomainXMLFlags
+module.exports.VirDomainCreateFlags = VirDomainCreateFlags
+module.exports.VirDomainDefineFlags = VirDomainDefineFlags
+module.exports.VirDomainDestroyFlags = VirDomainDestroyFlags
+module.exports.VirDomainRebootFlag = VirDomainRebootFlag
+module.exports.VirDomainUndefineFlags = VirDomainUndefineFlags
+module.exports.VirDomainModificationImpact = VirDomainModificationImpact
+module.exports.VirDomainMemoryModFlags = VirDomainMemoryModFlags

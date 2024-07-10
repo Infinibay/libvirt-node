@@ -11,3 +11,4 @@ mod storage_pool;
 mod nw_filter;
 mod node_info;
 mod domain_stats_record;
+mod enums;

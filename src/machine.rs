@@ -388,6 +388,10 @@ impl Machine {
   }
 
   /// Get the hostname of the domain.
+  /// 
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the lookup. Use VirDomainGetHostnameFlags enum
   ///
   /// # Returns
   ///
@@ -485,6 +489,10 @@ impl Machine {
   }
 
   /// Get the XML description of the domain.
+  /// 
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the lookup. Use VirDomainXMLFlags enum
   ///
   /// # Returns
   ///
@@ -549,7 +557,7 @@ impl Machine {
   /// 
   /// # Arguments
   ///
-  /// * `flags` - The flags to use for the creation. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainState
+  /// * `flags` - The flags to use for the creation. Use VirDomainCreateFlags enum
   ///
   /// # Returns
   ///
@@ -623,7 +631,7 @@ impl Machine {
   /// # Arguments
   ///
   /// * `xml` - The XML description of the domain.
-  /// * `flags` - The flags to use for the creation. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainCreateFlags
+  /// * `flags` - The flags to use for the creation. Use VirDomainCreateFlags enum
   ///
   /// # Returns
   ///
@@ -698,7 +706,7 @@ impl Machine {
   /// # Arguments
   ///
   /// * `xml` - The XML description of the domain.
-  /// * `flags` - The flags to use for the definition. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainCreateFlags
+  /// * `flags` - The flags to use for the definition. Use VirDomainDefineFlags enum
   ///
   /// # Returns
   ///
@@ -794,7 +802,7 @@ impl Machine {
   ///
   /// # Arguments
   ///
-  /// * `flags` - The flags to use for the destruction. Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainDestroyFlags
+  /// * `flags` - The flags to use for the destruction. Use VirDomainDestroyFlags enum
   ///
   /// # Returns
   ///
@@ -861,7 +869,7 @@ impl Machine {
   ///
   /// # Arguments
   ///
-  /// * `flags` - The flags to use for the reboot. Check virDomainRebootFlagValues
+  /// * `flags` - The flags to use for the reboot. Use VirDomainRebootFlag enum
   ///
   /// # Returns
   ///
@@ -974,9 +982,13 @@ impl Machine {
     }
   }
 
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the undefinition. Use VirDomainUndefineFlags enum
   #[napi]
   pub fn undefine_flags(&self, flags: u32) -> napi::Result<()> {
-    let result = self.domain.undefine_flags(flags);
+    let result = self.domain.undefine_flags(flags as u32);
     match result {
       Ok(_) => Ok(()),
       Err(err) => Err(napi::Error::from_reason(err.to_string())),
@@ -1054,19 +1066,27 @@ impl Machine {
     }
   }
 
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the memory modification. Use VirDomainMemoryModFlags enum
   #[napi]
   pub fn set_memory_flags(&self, memory: BigInt, flags: u32) -> napi::Result<bool> {
     let (signed, memory_u64, lossless) = memory.get_u64();
     if !lossless {
       return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
     }
-    let result = self.domain.set_memory_flags(memory_u64, flags);
+    let result = self.domain.set_memory_flags(memory_u64, flags as u32);
     match result {
       Ok(result) => Ok(result),
       Err(err) => Err(napi::Error::from_reason(err.to_string())),
     }
   }
 
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the memory modification. Use VirDomainMemoryModFlags enum
   #[napi]
   pub fn set_memory_stats_period(&self, period: i32, flags: u32) -> napi::Result<bool> {
     let result = self.domain.set_memory_stats_period(period, flags);
