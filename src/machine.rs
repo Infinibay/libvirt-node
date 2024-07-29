@@ -1033,7 +1033,7 @@ impl Machine {
 
   #[napi]
   pub fn set_max_memory(&self, memory: BigInt) -> napi::Result<bool> {
-    let (signed, memory_u64, lossless) = memory.get_u64();
+    let (_signed, memory_u64, lossless) = memory.get_u64();
     if !lossless {
       return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
     }
@@ -1072,7 +1072,7 @@ impl Machine {
   /// * `flags` - The flags to use for the memory modification. Use VirDomainMemoryModFlags enum
   #[napi]
   pub fn set_memory_flags(&self, memory: BigInt, flags: u32) -> napi::Result<bool> {
-    let (signed, memory_u64, lossless) = memory.get_u64();
+    let (_signed, memory_u64, lossless) = memory.get_u64();
     if !lossless {
       return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
     }
@@ -1143,7 +1143,7 @@ impl Machine {
 
   #[napi]
   pub fn migrate_set_max_speed(&self, bandwidth: BigInt, flags: u32) -> napi::Result<u32> {
-    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
+    let (_signed, bandwidth_u64, lossless) = bandwidth.get_u64();
     if !lossless {
       return Err(napi::Error::from_reason("Overflow: BigInt value exceeds u64 max value".to_string()));
     }
