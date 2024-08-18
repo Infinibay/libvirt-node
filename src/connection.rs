@@ -42,6 +42,15 @@ impl Connection {
     }
   }
 
+  // close
+  #[napi]
+  pub fn close(&mut self) -> napi::Result<()> {
+    match self.con.close() {
+      Ok(_) => Ok(()),
+      Err(err) => Err(napi::Error::from_reason(err.to_string())),
+    }
+  }
+
   #[napi]
   pub fn is_alive(&self) -> napi::Result<bool> {
     match self.con.is_alive() {

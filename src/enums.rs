@@ -116,3 +116,23 @@ pub enum VirDomainMemoryModFlags {
     /// Affect Max rather than current
     VirDomainMemMaximum = 4,
 }
+
+#[napi]
+#[repr(u32)]
+pub enum VirStoragePoolCreateFlags {
+    /// Default behavior
+    VirStoragePoolCreateNormal = 0,
+    /// Create pool from XML, build it
+    VirStoragePoolCreateWithBuild = 1,
+    /// Create pool from XML, build it and overwrite if exists
+    VirStoragePoolCreateWithBuildOverwrite = 2,
+    /// Create pool from XML, build it and do not overwrite if exists
+    VirStoragePoolCreateWithBuildNoOverwrite = 4,
+}
+
+#[napi]
+#[repr(u32)]
+pub enum VirStorageXMLFlags {
+    /// Inactive
+    VirStorageXMLInactive = 1,
+}
