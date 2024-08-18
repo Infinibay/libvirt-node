@@ -8,6 +8,7 @@ mod interface;
 mod node_device;
 mod secret;
 mod storage_pool;
+mod storage_vol;
 mod nw_filter;
 mod node_info;
 mod domain_stats_record;
