@@ -194,8 +194,8 @@ impl StorageVol {
     /// ```
     #[napi]
     pub fn get_info(&self) -> NapiResult<serde_json::Value> {
-			// TODO: Provably we will need to create a struct to match the info returned by libvirt
-			// and then convert it to a JsObject
+        // TODO: Provably we will need to create a struct to match the info returned by libvirt
+        // and then convert it to a JsObject
         match self.vol.get_info() {
             Ok(info) => {
                 let value = json!({
