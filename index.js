@@ -310,7 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, NwFilter, NodeInfo, DomainStatsRecord, VirDomainGetHostnameFlags, VirDomainXMLFlags, VirDomainCreateFlags, VirDomainDefineFlags, VirDomainDestroyFlags, VirDomainRebootFlag, VirDomainUndefineFlags, VirDomainModificationImpact, VirDomainMemoryModFlags } = nativeBinding
+const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, StorageVol, NwFilter, NodeInfo, DomainStatsRecord, VirDomainGetHostnameFlags, VirDomainXMLFlags, VirDomainCreateFlags, VirDomainDefineFlags, VirDomainDestroyFlags, VirDomainRebootFlag, VirDomainUndefineFlags, VirDomainModificationImpact, VirDomainMemoryModFlags, VirStoragePoolCreateFlags, VirStorageXMLFlags } = nativeBinding
 
 module.exports.Connection = Connection
 module.exports.Machine = Machine
@@ -327,6 +327,7 @@ module.exports.Interface = Interface
 module.exports.NodeDevice = NodeDevice
 module.exports.Secret = Secret
 module.exports.StoragePool = StoragePool
+module.exports.StorageVol = StorageVol
 module.exports.NwFilter = NwFilter
 module.exports.NodeInfo = NodeInfo
 module.exports.DomainStatsRecord = DomainStatsRecord
@@ -339,3 +340,5 @@ module.exports.VirDomainRebootFlag = VirDomainRebootFlag
 module.exports.VirDomainUndefineFlags = VirDomainUndefineFlags
 module.exports.VirDomainModificationImpact = VirDomainModificationImpact
 module.exports.VirDomainMemoryModFlags = VirDomainMemoryModFlags
+module.exports.VirStoragePoolCreateFlags = VirStoragePoolCreateFlags
+module.exports.VirStorageXMLFlags = VirStorageXMLFlags
