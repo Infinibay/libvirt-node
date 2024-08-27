@@ -164,12 +164,12 @@ export class Machine {
    *
    * # Arguments
    *
-   * * `name` - A string slice that holds the name of the domain.
    * * `con` - A reference to the Connection object.
+   * * `name` - A String that holds the name of the domain.
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
+   * This function returns a `napi::Result` which is:
    * * `Ok(Machine)` - If the domain is found.
    * * `Err(napi::Error)` - If there is an error during the lookup.
    *
@@ -179,9 +179,9 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function lookupDomain() {
-   *   const conn = Connection.open('quemu:///system');
+   *   const conn = await Connection.open('qemu:///system');
    *   try {
-   *     const machine = await Machine.lookupByName('your-domain-name', conn);
+   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
    *     console.log('Domain found:', machine);
    *   } catch (err) {
    *     console.error('Error looking up domain:', err);
@@ -191,7 +191,7 @@ export class Machine {
    * lookupDomain();
    * ```
    */
-  static lookupByName(name: string, con: Connection): this
+  static lookupByName(con: Connection, name: string): this
   /**
    * Looks up a domain by its ID.
    *
@@ -202,7 +202,7 @@ export class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
+   * This function returns a `napi::Result` which is:
    * * `Ok(Machine)` - If the domain is found.
    * * `Err(napi::Error)` - If there is an error during the lookup.
    *
@@ -212,12 +212,14 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function lookupDomainById() {
-   *   const conn = Connection.open('quemu:///system');
+   *   const conn = Connection.open('qemu:///system');
    *   try {
    *     const machine = await Machine.lookupById(conn, 1); // Replace 1 with your domain ID
    *     console.log('Domain found:', machine);
    *   } catch (err) {
    *     console.error('Error looking up domain by ID:', err);
+   *   } finally {
+   *     conn.close();
    *   }
    * }
    *
@@ -231,7 +233,7 @@ export class Machine {
    * # Arguments
    *
    * * `conn` - A reference to the Connection object.
-   * * `uuid` - The UUID of the domain.
+   * * `uuid` - The UUID of the domain as a string.
    *
    * # Returns
    *
@@ -245,12 +247,14 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function lookupDomainByUuid() {
-   *   const conn = Connection.open('quemu:///system');
+   *   const conn = Connection.open('qemu:///system');
    *   try {
-   *     const machine = await Machine.lookupByUuidString(conn, 'your-domain-uuid');
+   *     const machine = Machine.lookupByUuidString(conn, 'your-domain-uuid');
    *     console.log('Domain found:', machine);
    *   } catch (err) {
    *     console.error('Error looking up domain by UUID:', err);
+   *   } finally {
+   *     conn.close();
    *   }
    * }
    *
@@ -276,8 +280,8 @@ export class Machine {
    * async function getDomainState() {
    *   const conn = Connection.open('quemu:///system');
    *   try {
-   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *     const state = await machine.getState();
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const state = machine.getState();
    *     if (state.result === VIR_DOMAIN_RUNNING) {
    *       console.log('Domain is running');
    *     } else {
@@ -307,13 +311,15 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainName() {
-   *   const conn = Connection.open('quemu:///system');
+   *   const conn = Connection.open('qemu:///system');
    *   try {
-   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *     const name = await machine.get_name();
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const name = machine.getName();
    *     console.log('Domain name:', name);
    *   } catch (err) {
-   *     console.error('Error looking up domain by UUID:', err);
+   *     console.error('Error getting domain name:', err);
+   *   } finally {
+   *     conn.close();
    *   }
    * }
    *
@@ -336,13 +342,15 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainOsType() {
-   *   const conn = Connection.open('quemu:///system');
+   *   const conn = Connection.open('qemu:///system');
    *   try {
-   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *     const osType = await machine.getOsType();
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const osType = machine.getOsType();
    *     console.log('Domain OS type:', osType);
    *   } catch (err) {
-   *     console.error('Error looking up domain by UUID:', err);
+   *     console.error('Error getting domain OS type:', err);
+   *   } finally {
+   *     conn.close();
    *   }
    * }
    *
@@ -355,7 +363,7 @@ export class Machine {
    *
    * # Arguments
    *
-   * * `flags` - The flags to use for the lookup. Use VirDomainGetHostnameFlags enum
+   * * `flags` - The flags to use for the lookup. Use VirDomainGetHostnameFlags enum.
    *
    * # Returns
    *
@@ -369,13 +377,15 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainHostname() {
-   *   const conn = Connection.open('quemu:///system');
+   *   const conn = Connection.open('qemu:///system');
    *   try {
-   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *     const hostname = await machine.getHostname();
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const hostname = machine.getHostname(0);
    *     console.log('Domain hostname:', hostname);
    *   } catch (err) {
-   *     console.error('Error looking up domain by UUID:', err);
+   *     console.error('Error getting domain hostname:', err);
+   *   } finally {
+   *     conn.close();
    *   }
    * }
    *
@@ -398,13 +408,15 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainUuid() {
-   *   const conn = Connection.open('quemu:///system');
+   *   const conn = Connection.open('qemu:///system');
    *   try {
-   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *     const uuid = await machine.getUuid();
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const uuid = machine.getUuidString();
    *     console.log('Domain UUID:', uuid);
    *   } catch (err) {
-   *     console.error('Error looking up domain by name:', err);
+   *     console.error('Error getting domain UUID:', err);
+   *   } finally {
+   *     conn.close();
    *   }
    * }
    *
@@ -417,9 +429,9 @@ export class Machine {
    *
    * # Returns
    *
-   * This function returns an `Option` which is:
+   * This function returns an `Option<u32>` which is:
    * * `Some(u32)` - If the ID is found.
-   * * `None` - If there is an error during the lookup.
+   * * `None` - If the domain is not running or doesn't have an ID assigned.
    *
    * # Example (in JavaScript)
    *
@@ -427,10 +439,20 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainId() {
-   *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *   const id = machine.get_id();
-   *   console.log('Domain ID:', id);
+   *   const conn = Connection.open('qemu:///system');
+   *   try {
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const id =.getId();
+   *     if (id !== null) {
+   *       console.log('Domain ID:', id);
+   *     } else {
+   *       console.log('Domain is not running or has no ID assigned');
+   *     }
+   *   } catch (err) {
+   *     console.error('Error:', err);
+   *   } finally {
+   *     conn.close();
+   *   }
    * }
    *
    * getDomainId();
@@ -442,7 +464,7 @@ export class Machine {
    *
    * # Arguments
    *
-   * * `flags` - The flags to use for the lookup. Use VirDomainXMLFlags enum
+   * * `flags` - The flags to use for the lookup. Use VirDomainXMLFlags enum.
    *
    * # Returns
    *
@@ -456,10 +478,16 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainXml() {
-   *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *   const xml = await machine.getXml();
-   *   console.log('Domain XML:', xml);
+   *   const conn = Connection.open('qemu:///system');
+   *   try {
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const xml = machine.getXmlDesc(0); // Pass appropriate flags
+   *     console.log('Domain XML:', xml);
+   *   } catch (err) {
+   *     console.error('Error:', err);
+   *   } finally {
+   *     conn.close();
+   *   }
    * }
    *
    * getDomainXml();
@@ -472,7 +500,7 @@ export class Machine {
    * # Returns
    *
    * This function returns a `Result` which is:
-   * * `Ok(u32)` - If the domain is created.
+   * * `Ok(u32)` - If the domain is created successfully, returns the domain ID.
    * * `Err(napi::Error)` - If there is an error during the creation.
    *
    * # Example (in JavaScript)
@@ -481,9 +509,16 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function createDomain() {
-   *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *   await machine.create();
+   *   const conn = Connection.open('qemu:///system');
+   *   try {
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const domainId = machine.create();
+   *     console.log('Domain created with ID:', domainId);
+   *   } catch (err) {
+   *     console.error('Error creating domain:', err);
+   *   } finally {
+   *     conn.close();
+   *   }
    * }
    *
    * createDomain();
@@ -495,12 +530,12 @@ export class Machine {
    *
    * # Arguments
    *
-   * * `flags` - The flags to use for the creation. Use VirDomainCreateFlags enum
+   * * `flags` - The flags to use for the creation. Use VirDomainCreateFlags enum.
    *
    * # Returns
    *
    * This function returns a `Result` which is:
-   * * `Ok(u32)` - If the domain is created.
+   * * `Ok(u32)` - If the domain is created successfully, returns the domain ID.
    * * `Err(napi::Error)` - If there is an error during the creation.
    *
    * # Example (in JavaScript)
@@ -511,9 +546,16 @@ export class Machine {
    * const VIR_DOMAIN_START_PAUSED = 1;
    *
    * async function createDomainWithFlags() {
-   *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *   await machine.createWithFlags(VIR_DOMAIN_START_PAUSED);
+   *   const conn = Connection.open('qemu:///system');
+   *   try {
+   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
+   *     const domainId = machine.createWithFlags(VIR_DOMAIN_START_PAUSED);
+   *     console.log('Domain created with ID:', domainId);
+   *   } catch (err) {
+   *     console.error('Error creating domain:', err);
+   *   } finally {
+   *     conn.close();
+   *   }
    * }
    *
    * createDomainWithFlags();
@@ -526,8 +568,8 @@ export class Machine {
    * # Returns
    *
    * This function returns a `Result` which is:
-   * * `Ok(MachineInfo)` - If the information is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * * `Ok(MachineInfo)` - If the information is retrieved successfully.
+   * * `Err(napi::Error)` - If there is an error during the retrieval.
    *
    * # Example (in JavaScript)
    *
@@ -535,10 +577,16 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainInfo() {
-   *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *   const info = await machine.getInfo();
-   *   console.log('Domain info:', info);
+   *   const conn = Connection.open('qemu:///system');
+   *   try {
+   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *     const info = machine.getInfo();
+   *     console.log('Domain info:', info);
+   *   } catch (err) {
+   *     console.error('Error:', err);
+   *   } finally {
+   *     conn.close();
+   *   }
    * }
    *
    * getDomainInfo();
@@ -566,9 +614,9 @@ export class Machine {
    *
    * async function createDomainFromXml() {
    *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.createXml(conn, 'your-domain-xml', 0);
+   *   const machine = Machine.createXml(conn, 'your-domain-xml', 0);
    *   // Now, we can power on the domain
-   *   await machine.create();
+   *   machine.create();
    * }
    *
    * createDomainFromXml();
@@ -580,12 +628,13 @@ export class Machine {
    *
    * # Arguments
    *
+   * * `conn` - The Connection object to use.
    * * `xml` - The XML description of the domain.
    *
    * # Returns
    *
    * This function returns a `Result` which is:
-   * * `Ok(Machine)` - If the domain is defined.
+   * * `Ok(Machine)` - If the domain is defined successfully.
    * * `Err(napi::Error)` - If there is an error during the definition.
    *
    * # Example (in JavaScript)
@@ -594,11 +643,12 @@ export class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function defineDomainFromXml() {
-   *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.defineXml(conn, 'your-domain-xml');
+   *   const conn = Connection.open('qemu:///system');
+   *   const machine = Machine.defineXml(conn, 'your-domain-xml');
+   *   console.log('Domain defined successfully');
    * }
    *
-   * defineDomainFromXml();
+   * defineDomainFromXml().catch(console.error);
    * ```
    */
   static defineXml(conn: Connection, xml: string): Machine
@@ -607,26 +657,29 @@ export class Machine {
    *
    * # Arguments
    *
+   * * `conn` - The Connection object to use.
    * * `xml` - The XML description of the domain.
-   * * `flags` - The flags to use for the definition. Use VirDomainDefineFlags enum
+   * * `flags` - The flags to use for the definition. Use VirDomainDefineFlags enum.
    *
    * # Returns
    *
    * This function returns a `Result` which is:
-   * * `Ok(Machine)` - If the domain is defined.
+   * * `Ok(Machine)` - If the domain is defined successfully.
    * * `Err(napi::Error)` - If there is an error during the definition.
    *
    * # Example (in JavaScript)
    *
    * ```javascript
-   * const { Connection, Machine } = require('your-node-package');
+   * const { Connection, Machine, VirDomainDefineFlags } = require('your-node-package');
    *
-   * async function defineDomainFromXml() {
-   *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.defineXml(conn, 'your-domain-xml');
+   * async function defineDomainFromXmlWithFlags() {
+   *   const conn = Connection.open('qemu:///system');
+   *   const flags = VirDomainDefineFlags.VIR_DOMAIN_DEFINE_VALIDATE;
+   *   const machine = Machine.defineXmlFlags(conn, 'your-domain-xml', flags);
+   *   console.log('Domain defined successfully with flags');
    * }
    *
-   * defineDomainFromXml();
+   * defineDomainFromXmlWithFlags().catch(console.error);
    * ```
    */
   static defineXmlFlags(conn: Connection, xml: string, flags: number): Machine
@@ -670,7 +723,7 @@ export class Machine {
    *
    * async function resetDomain() {
    *   const conn = Connection.open('quemu:///system');
-   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const machine = Machine.lookupByName(conn, 'your-domain-name');
    *   await machine.reset();
    * }
    *
@@ -979,7 +1032,25 @@ export class MemoryParameters {
   /** Represents the maximum swap plus memory the guest can use. */
   swapHardLimit?: bigint
 }
-export class Network { }
+export class Network {
+  static lookupByName(conn: Connection, name: string): Network
+  static lookupByUuidString(conn: Connection, uuid: string): Network
+  getName(): string
+  getUuidString(): string
+  getBridgeName(): string
+  getXmlDesc(flags: number): string
+  create(): number
+  static defineXml(conn: Connection, xml: string): Network
+  static createXml(conn: Connection, xml: string): Network
+  destroy(): void
+  undefine(): void
+  free(): void
+  isActive(): boolean
+  isPersistent(): boolean
+  getAutostart(): boolean
+  setAutostart(autostart: boolean): number
+  update(cmd: number, section: number, index: number, xml: string, flags: number): void
+}
 export class Interface { }
 export class NodeDevice { }
 export class Secret { }
@@ -1048,7 +1119,7 @@ export class StorageVol {
    * createQcow2Disk().catch(console.error);
    * ```
    */
-  static createXml(pool: StoragePool, xml: string, flags: number): NapiResult
+  static createXml(pool: StoragePool, xml: string, flags: number): StorageVol
   /**
    * Creates a storage volume, using an existing volume as input.
    *
@@ -1090,7 +1161,7 @@ export class StorageVol {
    * cloneVolume().catch(console.error);
    * ```
    */
-  static createXmlFrom(pool: StoragePool, xml: string, vol: StorageVol, flags: number): NapiResult
+  static createXmlFrom(pool: StoragePool, xml: string, vol: StorageVol, flags: number): StorageVol
   /**
    * Deletes a storage volume.
    *
@@ -1125,7 +1196,7 @@ export class StorageVol {
    * deleteVolume().catch(console.error);
    * ```
    */
-  delete(flags: number): NapiResult
+  delete(flags: number): void
   /**
    * Retrieves information about a storage volume.
    *
@@ -1157,7 +1228,7 @@ export class StorageVol {
    * getVolumeInfo().catch(console.error);
    * ```
    */
-  getInfo(): NapiResult
+  getInfo(): any
   /**
    * Retrieves the name of the storage volume.
    *
@@ -1184,7 +1255,7 @@ export class StorageVol {
    * getVolumeName().catch(console.error);
    * ```
    */
-  getName(): NapiResult
+  getName(): string
   /**
    * Retrieves the path of the storage volume.
    *
@@ -1211,7 +1282,7 @@ export class StorageVol {
    * getVolumePath().catch(console.error);
    * ```
    */
-  getPath(): NapiResult
+  getPath(): string
   /**
    * Retrieves the XML description of the storage volume.
    *
@@ -1242,7 +1313,7 @@ export class StorageVol {
    * getVolumeXMLDesc().catch(console.error);
    * ```
    */
-  getXmlDesc(flags: number): NapiResult
+  getXmlDesc(flags: number): string
   /**
    * Resizes a storage volume.
    *
@@ -1276,7 +1347,7 @@ export class StorageVol {
    * resizeVolume().catch(console.error);
    * ```
    */
-  resize(capacity: bigint, flags: number): NapiResult
+  resize(capacity: bigint, flags: number): void
   /**
    * Wipes a storage volume.
    *
@@ -1310,7 +1381,7 @@ export class StorageVol {
    * wipeVolume().catch(console.error);
    * ```
    */
-  wipe(flags: number): NapiResult
+  wipe(flags: number): void
   /**
    * Looks up a storage volume based on its name within a storage pool.
    *
@@ -1346,7 +1417,7 @@ export class StorageVol {
    * lookupVolume().catch(console.error);
    * ```
    */
-  static lookupByName(pool: StoragePool, name: string): NapiResult
+  static lookupByName(pool: StoragePool, name: string): StorageVol | null
   /**
    * Looks up a storage volume based on its unique key.
    *
@@ -1383,7 +1454,7 @@ export class StorageVol {
    * lookupVolumeByKey().catch(console.error);
    * ```
    */
-  static lookupByKey(conn: Connection, key: string): NapiResult
+  static lookupByKey(conn: Connection, key: string): StorageVol | null
   /**
    * Looks up a storage volume based on its path.
    *
@@ -1420,7 +1491,7 @@ export class StorageVol {
    * lookupVolumeByPath().catch(console.error);
    * ```
    */
-  static lookupByPath(conn: Connection, path: string): NapiResult
+  static lookupByPath(conn: Connection, path: string): StorageVol | null
   /**
    * Frees the storage volume object.
    *
@@ -1456,7 +1527,7 @@ export class StorageVol {
    *
    * Note: After calling this method, the StorageVol object should not be used anymore.
    */
-  free(): NapiResult
+  free(): void
   /**
    * Wipes a storage volume using a specific algorithm.
    *
@@ -1496,7 +1567,7 @@ export class StorageVol {
    *
    * Note: This operation may take a long time depending on the size of the volume and the chosen algorithm.
    */
-  wipePattern(algorithm: number, flags: number): NapiResult
+  wipePattern(algorithm: number, flags: number): void
 }
 export type NWFilter = NwFilter
 export class NwFilter { }
