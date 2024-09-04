@@ -1,14 +1,8 @@
 use napi::{
   bindgen_prelude::{FromNapiValue, ToNapiValue},
-  CallContext, Env, JsBoolean, JsObject, JsString, JsUndefined, NapiRaw, Property,
-  Result as NapiResult,
+  NapiRaw,
 };
-
-use virt::{connect::Connect, domain::Domain};
-
-// Add them when we need them
-// use log::{error, info, warn};
-use napi_derive::js_function;
+use virt::{connect::Connect};
 
 use crate::machine::Machine;
 

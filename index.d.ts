@@ -592,7 +592,7 @@ export declare class Machine {
    * lookupDomain();
    * ```
    */
-  static lookupByName(con: Connection, name: string): this
+  static lookupByName(con: Connection, name: string): Machine | null
   /**
    * Looks up a domain by its ID.
    *
@@ -627,7 +627,7 @@ export declare class Machine {
    * lookupDomainById();
    * ```
    */
-  static lookupById(conn: Connection, id: number): Machine
+  static lookupById(conn: Connection, id: number): Machine | null
   /**
    * Looks up a domain by its UUID.
    *
@@ -662,7 +662,7 @@ export declare class Machine {
    * lookupDomainByUuid();
    * ```
    */
-  static lookupByUuidString(conn: Connection, uuid: string): Machine
+  static lookupByUuidString(conn: Connection, uuid: string): Machine | null
   /**
    * Get the state of the domain.
    *
@@ -696,7 +696,7 @@ export declare class Machine {
    * getDomainState();
    * ```
    */
-  getState(): StateResult
+  getState(): StateResult | null
   /**
    * Get the name of the domain.
    *
@@ -727,7 +727,7 @@ export declare class Machine {
    * getDomainName();
    * ```
    */
-  getName(): string
+  getName(): string | null
   /**
    * Get the OS type of the domain.
    *
@@ -758,7 +758,7 @@ export declare class Machine {
    * getDomainOsType();
    * ```
    */
-  getOsType(): string
+  getOsType(): string | null
   /**
    * Get the hostname of the domain.
    *
@@ -793,7 +793,7 @@ export declare class Machine {
    * getDomainHostname();
    * ```
    */
-  getHostname(flags: number): string
+  getHostname(flags: number): string | null
   /**
    * Get the UUID of the domain.
    *
@@ -824,7 +824,7 @@ export declare class Machine {
    * getDomainUuid();
    * ```
    */
-  getUuidString(): string
+  getUuidString(): string | null
   /**
    * Get the ID of the domain.
    *
@@ -894,7 +894,7 @@ export declare class Machine {
    * getDomainXml();
    * ```
    */
-  getXmlDesc(flags: number): string
+  getXmlDesc(flags: number): string | null
   /**
    * Create/power-on the domain.
    *
@@ -925,7 +925,7 @@ export declare class Machine {
    * createDomain();
    * ```
    */
-  create(): number
+  create(): number | null
   /**
    * Create/power-on the domain with flags.
    *
@@ -962,7 +962,7 @@ export declare class Machine {
    * createDomainWithFlags();
    * ```
    */
-  createWithFlags(flags: number): number
+  createWithFlags(flags: number): number | null
   /**
    * Get the information of the domain.
    *
@@ -993,7 +993,7 @@ export declare class Machine {
    * getDomainInfo();
    * ```
    */
-  getInfo(): MachineInfo
+  getInfo(): MachineInfo | null
   /**
    * Create a domain from an XML description.
    *
@@ -1023,7 +1023,7 @@ export declare class Machine {
    * createDomainFromXml();
    * ```
    */
-  static createXml(conn: Connection, xml: string, flags: number): Machine
+  static createXml(conn: Connection, xml: string, flags: number): Machine | null
   /**
    * Define a domain from an XML description.
    *
@@ -1052,7 +1052,7 @@ export declare class Machine {
    * defineDomainFromXml().catch(console.error);
    * ```
    */
-  static defineXml(conn: Connection, xml: string): Machine
+  static defineXml(conn: Connection, xml: string): Machine | null
   /**
    * Define a domain from an XML description with flags.
    *
@@ -1083,7 +1083,7 @@ export declare class Machine {
    * defineDomainFromXmlWithFlags().catch(console.error);
    * ```
    */
-  static defineXmlFlags(conn: Connection, xml: string, flags: number): Machine
+  static defineXmlFlags(conn: Connection, xml: string, flags: number): Machine | null
   /**
    * Destroy/power-off the domain.
    *
@@ -1107,7 +1107,7 @@ export declare class Machine {
    * destroyDomain();
    * ```
    */
-  destroy(): void
+  destroy(): undefined | null
   /**
    * Reset the domain.
    *
@@ -1131,7 +1131,7 @@ export declare class Machine {
    * resetDomain();
    * ```
    */
-  reset(): number
+  reset(): number | null
   /**
    * Destroy/power-off the domain with flags.
    *
@@ -1161,7 +1161,7 @@ export declare class Machine {
    * destroyDomain();
    * ```
    */
-  destroyFlags(flags: number): number
+  destroyFlags(flags: number): number | null
   /**
    * Shutdown the domain.
    *
@@ -1185,7 +1185,7 @@ export declare class Machine {
    * shutdownDomain();
    * ```
    */
-  shutdown(): number
+  shutdown(): number | null
   /**
    * Reboot the domain with flags.
    * Useful if you want to send ACPI events to the domain.
@@ -1216,7 +1216,7 @@ export declare class Machine {
    * rebootDomain();
    * ```
    */
-  reboot(flags: number): void
+  reboot(flags: number): undefined | null
   /**
    * Suspend the domain.
    * When machine is suspended, the process is frozen without further access to
@@ -1243,7 +1243,7 @@ export declare class Machine {
    * suspendDomain();
    * ```
    */
-  suspend(): number
+  suspend(): number | null
   /**
    * Resume the suspended domain.
    *
@@ -1267,83 +1267,83 @@ export declare class Machine {
    * resumeDomain();
    * ```
    */
-  resume(): number
-  isActive(): boolean
-  undefine(): void
+  resume(): number | null
+  isActive(): boolean | null
+  undefine(): number | null
   /**
    *
    * # Arguments
    *
    * * `flags` - The flags to use for the undefinition. Use VirDomainUndefineFlags enum
    */
-  undefineFlags(flags: number): void
-  free(): void
-  isUpdated(): boolean
-  getAutostart(): boolean
-  setAutostart(autostart: boolean): boolean
-  setMaxMemory(memory: bigint): boolean
-  getMaxVcpus(): bigint
-  setMemory(memory: bigint): boolean
+  undefineFlags(flags: number): number | null
+  free(): number | null
+  isUpdated(): boolean | null
+  getAutostart(): boolean | null
+  setAutostart(autostart: boolean): boolean | null
+  setMaxMemory(memory: bigint): boolean | null
+  getMaxVcpus(): bigint | null
+  setMemory(memory: bigint): boolean | null
   /**
    *
    * # Arguments
    *
    * * `flags` - The flags to use for the memory modification. Use VirDomainMemoryModFlags enum
    */
-  setMemoryFlags(memory: bigint, flags: number): boolean
+  setMemoryFlags(memory: bigint, flags: number): boolean | null
   /**
    *
    * # Arguments
    *
    * * `flags` - The flags to use for the memory modification. Use VirDomainMemoryModFlags enum
    */
-  setMemoryStatsPeriod(period: number, flags: number): boolean
-  setVcpus(vcpus: number): boolean
-  setVcpusFlags(vcpus: number, flags: number): boolean
-  static domainRestore(conn: Connection, path: string): void
-  static domainRestoreFlags(conn: Connection, path: string, flags: number): void
-  getVcpusFlags(flags: number): number
-  migrateSetMaxSpeed(bandwidth: bigint, flags: number): number
-  migrateGetMaxSpeed(flags: number): bigint
-  migrateSetCompressionCache(size: bigint, flags: number): number
-  migrateGetCompressionCache(flags: number): bigint
-  migrateSetMaxDowntime(downtime: bigint, flags: number): number
-  setTime(seconds: number, nseconds: number, flags: number): number
-  getTime(flags: number): Time
-  getBlockInfo(disk: string, flags: number): BlockInfo
-  pinVcpu(vcpu: number, cpumap: Uint8Array): number
-  pinVcpuFlags(vcpu: number, cpumap: Uint8Array, flags: number): number
-  pinEmulator(cpumap: Uint8Array, flags: number): number
-  rename(newName: string, flags: number): number
-  setUserPassword(user: string, password: string, flags: number): number
-  setBlockThreshold(dev: string, threshold: bigint, flags: number): number
-  openGraphics(idx: number, fd: number, flags: number): number
-  openGraphicsFd(idx: number, flags: number): number
-  interfaceStats(path: string): InterfaceStats
-  memoryStats(flags: number): Array<MemoryStat>
-  static saveImageGetXmlDesc(conn: Connection, file: string, flags: number): string
-  static saveImageDefineXml(conn: Connection, file: string, dxml: string, flags: number): number
-  attachDevice(xml: string): number
-  attachDeviceFlags(xml: string, flags: number): number
-  detachDevice(xml: string): number
-  detachDeviceFlags(xml: string, flags: number): number
-  updateDeviceFlags(xml: string, flags: number): number
-  managedSave(flags: number): number
-  hasManagedSave(flags: number): boolean
-  managedSaveRemove(flags: number): number
-  coreDump(to: string, flags: number): number
-  coreDumpWithFormat(to: string, format: number, flags: number): number
-  setMetadata(kind: number, metadata: string, key: string, uri: string, flags: number): number
-  getMetadata(kind: number, uri: string, flags: number): string
-  blockResize(disk: string, size: bigint, flags: number): number
-  getMemoryParameters(flags: number): MemoryParameters
-  setMemoryParameters(params: MemoryParameters, flags: number): number
-  migrate(dconn: Connection, flags: number, uri: string, bandwidth: bigint): this
-  migrateWithXml(dconn: Connection, dxml: string, flags: number, uri: string, bandwidth: bigint): this
-  migrateToUri(uri: string, flags: number, bandwidth: bigint): number
-  migrateToUriWithXml(dconnUri: string, migUri: string, dxml: string, flags: number, bandwidth: bigint): number
-  getNumaParameters(flags: number): NumaParameters
-  setNumaParameters(params: NumaParameters, flags: number): number
+  setMemoryStatsPeriod(period: number, flags: number): boolean | null
+  setVcpus(vcpus: number): boolean | null
+  setVcpusFlags(vcpus: number, flags: number): boolean | null
+  static domainRestore(conn: Connection, path: string): number | null
+  static domainRestoreFlags(conn: Connection, path: string, flags: number): number | null
+  getVcpusFlags(flags: number): number | null
+  migrateSetMaxSpeed(bandwidth: bigint, flags: number): number | null
+  migrateGetMaxSpeed(flags: number): bigint | null
+  migrateSetCompressionCache(size: bigint, flags: number): number | null
+  migrateGetCompressionCache(flags: number): bigint | null
+  migrateSetMaxDowntime(downtime: bigint, flags: number): number | null
+  setTime(seconds: number, nseconds: number, flags: number): number | null
+  getTime(flags: number): Time | null
+  getBlockInfo(disk: string, flags: number): BlockInfo | null
+  pinVcpu(vcpu: number, cpumap: Uint8Array): number | null
+  pinVcpuFlags(vcpu: number, cpumap: Uint8Array, flags: number): number | null
+  pinEmulator(cpumap: Uint8Array, flags: number): number | null
+  rename(newName: string, flags: number): number | null
+  setUserPassword(user: string, password: string, flags: number): number | null
+  setBlockThreshold(dev: string, threshold: bigint, flags: number): number | null
+  openGraphics(idx: number, fd: number, flags: number): number | null
+  openGraphicsFd(idx: number, flags: number): number | null
+  interfaceStats(path: string): InterfaceStats | null
+  memoryStats(flags: number): Array<MemoryStat> | null
+  static saveImageGetXmlDesc(conn: Connection, file: string, flags: number): string | null
+  static saveImageDefineXml(conn: Connection, file: string, dxml: string, flags: number): number | null
+  attachDevice(xml: string): number | null
+  attachDeviceFlags(xml: string, flags: number): number | null
+  detachDevice(xml: string): number | null
+  detachDeviceFlags(xml: string, flags: number): number | null
+  updateDeviceFlags(xml: string, flags: number): number | null
+  managedSave(flags: number): number | null
+  hasManagedSave(flags: number): boolean | null
+  managedSaveRemove(flags: number): number | null
+  coreDump(to: string, flags: number): number | null
+  coreDumpWithFormat(to: string, format: number, flags: number): number | null
+  setMetadata(kind: number, metadata: string, key: string, uri: string, flags: number): number | null
+  getMetadata(kind: number, uri: string, flags: number): string | null
+  blockResize(disk: string, size: bigint, flags: number): number | null
+  getMemoryParameters(flags: number): MemoryParameters | null
+  setMemoryParameters(params: MemoryParameters, flags: number): number | null
+  migrate(dconn: Connection, flags: number, uri: string, bandwidth: bigint): Machine | null
+  migrateWithXml(dconn: Connection, dxml: string, flags: number, uri: string, bandwidth: bigint): Machine | null
+  migrateToUri(uri: string, flags: number, bandwidth: bigint): number | null
+  migrateToUriWithXml(dconnUri: string, migUri: string, dxml: string, flags: number, bandwidth: bigint): number | null
+  getNumaParameters(flags: number): NumaParameters | null
+  setNumaParameters(params: NumaParameters, flags: number): number | null
 }
 /** Contains information about a virtual machine. */
 export declare class MachineInfo {
