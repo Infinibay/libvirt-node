@@ -407,10 +407,10 @@ pub enum ErrorNumber {
 
 #[napi]
 pub struct Error {
-  code: u32,
-  domain: u32,
-  message: String,
-	level: u32,
+	pub code: u32,
+	pub domain: u32,
+	pub message: String,
+	pub level: u32,
 }
 
 #[napi]

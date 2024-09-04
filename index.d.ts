@@ -1959,5 +1959,9 @@ export declare class NwFilter { }
 export declare class NodeInfo { }
 export declare class DomainStatsRecord { }
 export declare class Error {
+  code: number
+  domain: number
+  message: string
+  level: number
   static lastError(): Error
 }
