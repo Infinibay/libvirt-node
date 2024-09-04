@@ -1,6 +1,4 @@
-use napi::{Env, JsObject, Property, Result as NapiResult};
 use virt;
-use virt::connect::Connect;
 
 #[napi]
 pub struct StoragePool {
