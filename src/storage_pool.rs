@@ -21,10 +21,10 @@ impl StoragePool {
     pub fn define_xml(
         conn: &crate::connection::Connection,
         xml: String
-    ) -> napi::Result<StoragePool> {
+    ) -> Option<StoragePool> {
         match virt::storage_pool::StoragePool::define_xml(conn.get_connection(), &xml, 0) {
-            Ok(pool) => Ok(StoragePool::from_storage_pool(pool)),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(pool) => Some(StoragePool::from_storage_pool(pool)),
+            Err(_) => None,
         }
     }
 
@@ -34,10 +34,10 @@ impl StoragePool {
         conn: &crate::connection::Connection,
         xml: String,
         flags: u32
-    ) -> napi::Result<StoragePool> {
+    ) -> Option<StoragePool> {
         match virt::storage_pool::StoragePool::create_xml(conn.get_connection(), &xml, flags) {
-            Ok(pool) => Ok(StoragePool::from_storage_pool(pool)),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(pool) => Some(StoragePool::from_storage_pool(pool)),
+            Err(_) => None,
         }
     }
 
@@ -46,10 +46,10 @@ impl StoragePool {
     pub fn lookup_by_name(
         conn: &crate::connection::Connection,
         name: String
-    ) -> napi::Result<StoragePool> {
+    ) -> Option<StoragePool> {
         match virt::storage_pool::StoragePool::lookup_by_name(conn.get_connection(), &name) {
-            Ok(pool) => Ok(StoragePool::from_storage_pool(pool)),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(pool) => Some(StoragePool::from_storage_pool(pool)),
+            Err(_) => None,
         }
     }
 
@@ -60,37 +60,37 @@ impl StoragePool {
     pub fn lookup_by_uuid_string(
         conn: &crate::connection::Connection,
         uuid: String
-    ) -> napi::Result<StoragePool> {
+    ) -> Option<StoragePool> {
         match virt::storage_pool::StoragePool::lookup_by_uuid_string(conn.get_connection(), &uuid) {
-            Ok(pool) => Ok(StoragePool::from_storage_pool(pool)),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(pool) => Some(StoragePool::from_storage_pool(pool)),
+            Err(_) => None,
         }
     }
 
     // get_name
     #[napi]
-    pub fn get_name(&self) -> napi::Result<String> {
+    pub fn get_name(&self) -> Option<String> {
         match self.storage_pool.get_name() {
-            Ok(name) => Ok(name),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(name) => Some(name),
+            Err(_) => None,
         }
     }
 
     // num_of_volumes
     #[napi]
-    pub fn num_of_volumes(&self) -> napi::Result<u32> {
+    pub fn num_of_volumes(&self) -> Option<u32> {
         match self.storage_pool.num_of_volumes() {
-            Ok(num) => Ok(num),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(num) => Some(num),
+            Err(_) => None,
         }
     }
 
     // list_volumes
     #[napi]
-    pub fn list_volumes(&self) -> napi::Result<Vec<String>> {
+    pub fn list_volumes(&self) -> Option<Vec<String>> {
         match self.storage_pool.list_volumes() {
-            Ok(volumes) => Ok(volumes),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(volumes) => Some(volumes),
+            Err(_) => None,
         }
     }
 
@@ -98,109 +98,109 @@ impl StoragePool {
 
     // get_uuid_string
     #[napi]
-    pub fn get_uuid_string(&self) -> napi::Result<String> {
+    pub fn get_uuid_string(&self) -> Option<String> {
         match self.storage_pool.get_uuid_string() {
-            Ok(uuid) => Ok(uuid),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(uuid) => Some(uuid),
+            Err(_) => None,
         }
     }
 
     // get_xml_desc
     #[napi]
-    pub fn get_xml_desc(&self) -> napi::Result<String> {
+    pub fn get_xml_desc(&self) -> Option<String> {
         match self.storage_pool.get_xml_desc(0) {
-            Ok(xml) => Ok(xml),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(xml) => Some(xml),
+            Err(_) => None,
         }
     }
 
     // pub fn create(&self, flags: sys::virStoragePoolCreateFlags) -> Result<u32, Error> {
     #[napi]
-    pub fn create(&self, flags: u32) -> napi::Result<u32> {
+    pub fn create(&self, flags: u32) -> Option<u32> {
         match self.storage_pool.create(flags) {
-            Ok(num) => Ok(num),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(num) => Some(num),
+            Err(_) => None,
         }
     }
 
     // build
     #[napi]
-    pub fn build(&self, flags: u32) -> napi::Result<u32> {
+    pub fn build(&self, flags: u32) -> Option<u32> {
         match self.storage_pool.build(flags) {
-            Ok(num) => Ok(num),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(num) => Some(num),
+            Err(_) => None,
         }
     }
 
     // destroy
     #[napi]
-    pub fn destroy(&self) -> napi::Result<()> {
+    pub fn destroy(&self) -> Option<u32> {
         match self.storage_pool.destroy() {
-            Ok(_) => Ok(()),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 
     #[napi]
-    pub fn undefine(&self) -> napi::Result<()> {
+    pub fn undefine(&self) -> Option<u32> {
         match self.storage_pool.undefine() {
-            Ok(_) => Ok(()),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 
     #[napi]
-    pub fn free(&mut self) -> napi::Result<()> {
+    pub fn free(&mut self) -> Option<u32> {
         match self.storage_pool.free() {
-            Ok(_) => Ok(()),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 
     #[napi]
-    pub fn is_active(&self) -> napi::Result<bool> {
+    pub fn is_active(&self) -> Option<bool> {
         match self.storage_pool.is_active() {
-            Ok(active) => Ok(active),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(active) => Some(active),
+            Err(_) => None,
         }
     }
 
     #[napi]
-    pub fn is_persistent(&self) -> napi::Result<bool> {
+    pub fn is_persistent(&self) -> Option<bool> {
         match self.storage_pool.is_persistent() {
-            Ok(persistent) => Ok(persistent),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(persistent) => Some(persistent),
+            Err(_) => None,
         }
     }
 
     // TODO: create enum for this flags
     #[napi]
-    pub fn refresh(&self, flags: u32) -> napi::Result<()> {
+    pub fn refresh(&self, flags: u32) -> Option<u32> {
         match self.storage_pool.refresh(flags) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 
     #[napi]
-    pub fn get_autostart(&self) -> napi::Result<bool> {
+    pub fn get_autostart(&self) -> Option<bool> {
         match self.storage_pool.get_autostart() {
-            Ok(autostart) => Ok(autostart),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(autostart) => Some(autostart),
+            Err(_) => None,
         }
     }
 
     #[napi]
-    pub fn set_autostart(&self, autostart: bool) -> napi::Result<()> {
+    pub fn set_autostart(&self, autostart: bool) -> Option<u32> {
         match self.storage_pool.set_autostart(autostart) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 
     // get_info -> return a json/hash object
     #[napi]
-    pub fn get_info(&self) -> napi::Result<serde_json::Value> {
+    pub fn get_info(&self) -> Option<serde_json::Value> {
         match self.storage_pool.get_info() {
             Ok(info) => {
                 let mut json = serde_json::Map::new();
@@ -208,9 +208,9 @@ impl StoragePool {
                 json.insert("capacity".to_string(), serde_json::Value::Number(info.capacity.into()));
                 json.insert("allocation".to_string(), serde_json::Value::Number(info.allocation.into()));
                 json.insert("available".to_string(), serde_json::Value::Number(info.available.into()));
-                Ok(serde_json::Value::Object(json))
+                Some(serde_json::Value::Object(json))
             },
-            Err(err) => Err(napi::Error::from_reason(err.to_string())),
+            Err(_) => None,
         }
     }
 }

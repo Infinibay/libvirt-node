@@ -1456,26 +1456,26 @@ export declare class Interface { }
 export declare class NodeDevice { }
 export declare class Secret { }
 export declare class StoragePool {
-  static defineXml(conn: Connection, xml: string): StoragePool
-  static createXml(conn: Connection, xml: string, flags: number): StoragePool
-  static lookupByName(conn: Connection, name: string): StoragePool
-  static lookupByUuidString(conn: Connection, uuid: string): StoragePool
-  getName(): string
-  numOfVolumes(): number
-  listVolumes(): Array<string>
-  getUuidString(): string
-  getXmlDesc(): string
-  create(flags: number): number
-  build(flags: number): number
-  destroy(): void
-  undefine(): void
-  free(): void
-  isActive(): boolean
-  isPersistent(): boolean
-  refresh(flags: number): void
-  getAutostart(): boolean
-  setAutostart(autostart: boolean): void
-  getInfo(): any
+  static defineXml(conn: Connection, xml: string): StoragePool | null
+  static createXml(conn: Connection, xml: string, flags: number): StoragePool | null
+  static lookupByName(conn: Connection, name: string): StoragePool | null
+  static lookupByUuidString(conn: Connection, uuid: string): StoragePool | null
+  getName(): string | null
+  numOfVolumes(): number | null
+  listVolumes(): Array<string> | null
+  getUuidString(): string | null
+  getXmlDesc(): string | null
+  create(flags: number): number | null
+  build(flags: number): number | null
+  destroy(): number | null
+  undefine(): number | null
+  free(): number | null
+  isActive(): boolean | null
+  isPersistent(): boolean | null
+  refresh(flags: number): number | null
+  getAutostart(): boolean | null
+  setAutostart(autostart: boolean): number | null
+  getInfo(): any | null
 }
 export declare class StorageVol {
   /**
