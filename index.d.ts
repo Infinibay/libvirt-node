@@ -1520,7 +1520,7 @@ export declare class StorageVol {
    * createQcow2Disk().catch(console.error);
    * ```
    */
-  static createXml(pool: StoragePool, xml: string, flags: number): StorageVol
+  static createXml(pool: StoragePool, xml: string, flags: number): StorageVol | null
   /**
    * Creates a storage volume, using an existing volume as input.
    *
@@ -1562,7 +1562,7 @@ export declare class StorageVol {
    * cloneVolume().catch(console.error);
    * ```
    */
-  static createXmlFrom(pool: StoragePool, xml: string, vol: StorageVol, flags: number): StorageVol
+  static createXmlFrom(pool: StoragePool, xml: string, vol: StorageVol, flags: number): StorageVol | null
   /**
    * Deletes a storage volume.
    *
@@ -1597,7 +1597,7 @@ export declare class StorageVol {
    * deleteVolume().catch(console.error);
    * ```
    */
-  delete(flags: number): void
+  delete(flags: number): number | null
   /**
    * Retrieves information about a storage volume.
    *
@@ -1629,7 +1629,7 @@ export declare class StorageVol {
    * getVolumeInfo().catch(console.error);
    * ```
    */
-  getInfo(): any
+  getInfo(): any | null
   /**
    * Retrieves the name of the storage volume.
    *
@@ -1656,7 +1656,7 @@ export declare class StorageVol {
    * getVolumeName().catch(console.error);
    * ```
    */
-  getName(): string
+  getName(): string | null
   /**
    * Retrieves the path of the storage volume.
    *
@@ -1683,7 +1683,7 @@ export declare class StorageVol {
    * getVolumePath().catch(console.error);
    * ```
    */
-  getPath(): string
+  getPath(): string | null
   /**
    * Retrieves the XML description of the storage volume.
    *
@@ -1714,7 +1714,7 @@ export declare class StorageVol {
    * getVolumeXMLDesc().catch(console.error);
    * ```
    */
-  getXmlDesc(flags: number): string
+  getXmlDesc(flags: number): string | null
   /**
    * Resizes a storage volume.
    *
@@ -1748,7 +1748,7 @@ export declare class StorageVol {
    * resizeVolume().catch(console.error);
    * ```
    */
-  resize(capacity: bigint, flags: number): void
+  resize(capacity: bigint, flags: number): number | null
   /**
    * Wipes a storage volume.
    *
@@ -1782,7 +1782,7 @@ export declare class StorageVol {
    * wipeVolume().catch(console.error);
    * ```
    */
-  wipe(flags: number): void
+  wipe(flags: number): number | null
   /**
    * Looks up a storage volume based on its name within a storage pool.
    *
@@ -1928,7 +1928,7 @@ export declare class StorageVol {
    *
    * Note: After calling this method, the StorageVol object should not be used anymore.
    */
-  free(): void
+  free(): number | null
   /**
    * Wipes a storage volume using a specific algorithm.
    *
@@ -1968,7 +1968,7 @@ export declare class StorageVol {
    *
    * Note: This operation may take a long time depending on the size of the volume and the chosen algorithm.
    */
-  wipePattern(algorithm: number, flags: number): void
+  wipePattern(algorithm: number, flags: number): number | null
 }
 export type NWFilter = NwFilter
 export declare class NwFilter { }
