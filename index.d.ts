@@ -570,22 +570,24 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `napi::Result` which is:
-   * * `Ok(Machine)` - If the domain is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `Machine` - If the domain is found.
+   * * `null` - If there is an error during the lookup or the domain is not found.
+   *
+   * You can check `Error::lastError()` to get more information about the error.
    *
    * # Example (in JavaScript)
    *
    * ```javascript
-   * const { Connection, Machine } = require('your-node-package');
+   * const { Connection, Machine, Error } = require('your-node-package');
    *
    * async function lookupDomain() {
    *   const conn = await Connection.open('qemu:///system');
-   *   try {
-   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   if (machine) {
    *     console.log('Domain found:', machine);
-   *   } catch (err) {
-   *     console.error('Error looking up domain:', err);
+   *   } else {
+   *     console.error('Error looking up domain:', Error.lastError());
    *   }
    * }
    *
@@ -603,24 +605,24 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `napi::Result` which is:
-   * * `Ok(Machine)` - If the domain is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `Machine` - If the domain is found.
+   * * `null` - If there is an error during the lookup or the domain is not found.
+   *
+   * You can check `Error::lastError()` to get more information about the error.
    *
    * # Example (in JavaScript)
    *
    * ```javascript
-   * const { Connection, Machine } = require('your-node-package');
+   * const { Connection, Machine, Error } = require('your-node-package');
    *
    * async function lookupDomainById() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = await Machine.lookupById(conn, 1); // Replace 1 with your domain ID
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupById(conn, 1); // Replace 1 with your domain ID
+   *   if (machine) {
    *     console.log('Domain found:', machine);
-   *   } catch (err) {
-   *     console.error('Error looking up domain by ID:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error looking up domain by ID:', Error.lastError());
    *   }
    * }
    *
@@ -638,24 +640,24 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(Machine)` - If the domain is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `Machine` - If the domain is found.
+   * * `null` - If there is an error during the lookup or the domain is not found.
+   *
+   * You can check `Error::lastError()` to get more information about the error.
    *
    * # Example (in JavaScript)
    *
    * ```javascript
-   * const { Connection, Machine } = require('your-node-package');
+   * const { Connection, Machine, Error } = require('your-node-package');
    *
    * async function lookupDomainByUuid() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByUuidString(conn, 'your-domain-uuid');
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByUuidString(conn, 'your-domain-uuid');
+   *   if (machine) {
    *     console.log('Domain found:', machine);
-   *   } catch (err) {
-   *     console.error('Error looking up domain by UUID:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error looking up domain by UUID:', Error.lastError());
    *   }
    * }
    *
@@ -668,9 +670,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(StateResult)` - If the state is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `StateResult` - If the state is found.
+   * * `null` - If there is an error during the lookup.
    *
    * # Example (in JavaScript)
    *
@@ -679,17 +681,17 @@ export declare class Machine {
    * const VIR_DOMAIN_RUNNING = 1;
    *
    * async function getDomainState() {
-   *   const conn = Connection.open('quemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const state = machine.getState();
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const state = machine.getState();
+   *   if (state) {
    *     if (state.result === VIR_DOMAIN_RUNNING) {
    *       console.log('Domain is running');
    *     } else {
    *       console.log('Domain is not running');
    *     }
-   *   } catch (err) {
-   *     console.error('Error looking up domain by UUID:', err);
+   *   } else {
+   *     console.error('Error getting domain state');
    *   }
    * }
    *
@@ -702,9 +704,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(String)` - If the name is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `String` - If the name is found.
+   * * `null` - If there is an error during the lookup.
    *
    * # Example (in JavaScript)
    *
@@ -712,15 +714,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainName() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const name = machine.getName();
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const name = machine.getName();
+   *   if (name) {
    *     console.log('Domain name:', name);
-   *   } catch (err) {
-   *     console.error('Error getting domain name:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error getting domain name');
    *   }
    * }
    *
@@ -733,9 +733,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(String)` - If the OS type is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `String` - If the OS type is found.
+   * * `null` - If there is an error during the lookup.
    *
    * # Example (in JavaScript)
    *
@@ -743,15 +743,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainOsType() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const osType = machine.getOsType();
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const osType = machine.getOsType();
+   *   if (osType) {
    *     console.log('Domain OS type:', osType);
-   *   } catch (err) {
-   *     console.error('Error getting domain OS type:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error getting domain OS type');
    *   }
    * }
    *
@@ -762,15 +760,11 @@ export declare class Machine {
   /**
    * Get the hostname of the domain.
    *
-   * # Arguments
-   *
-   * * `flags` - The flags to use for the lookup. Use VirDomainGetHostnameFlags enum.
-   *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(String)` - If the hostname is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `String` - If the hostname is found.
+   * * `null` - If there is an error during the lookup.
    *
    * # Example (in JavaScript)
    *
@@ -778,15 +772,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainHostname() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const hostname = machine.getHostname(0);
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const hostname = machine.getHostname();
+   *   if (hostname) {
    *     console.log('Domain hostname:', hostname);
-   *   } catch (err) {
-   *     console.error('Error getting domain hostname:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error getting domain hostname');
    *   }
    * }
    *
@@ -799,9 +791,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(String)` - If the UUID is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `String` - If the UUID is found.
+   * * `null` - If there is an error during the lookup.
    *
    * # Example (in JavaScript)
    *
@@ -809,15 +801,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainUuid() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const uuid = machine.getUuidString();
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const uuid = machine.getUuidString();
+   *   if (uuid) {
    *     console.log('Domain UUID:', uuid);
-   *   } catch (err) {
-   *     console.error('Error getting domain UUID:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error getting domain UUID');
    *   }
    * }
    *
@@ -830,9 +820,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns an `Option<u32>` which is:
-   * * `Some(u32)` - If the ID is found.
-   * * `None` - If the domain is not running or doesn't have an ID assigned.
+   * This function returns:
+   * * `u32` - If the ID is found.
+   * * `null` - If there is an error during the lookup or the domain is not running.
    *
    * # Example (in JavaScript)
    *
@@ -840,19 +830,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainId() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const id =.getId();
-   *     if (id !== null) {
-   *       console.log('Domain ID:', id);
-   *     } else {
-   *       console.log('Domain is not running or has no ID assigned');
-   *     }
-   *   } catch (err) {
-   *     console.error('Error:', err);
-   *   } finally {
-   *     conn.close();
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const id = machine.getId();
+   *   if (id !== null) {
+   *     console.log('Domain ID:', id);
+   *   } else {
+   *     console.error('Error getting domain ID');
    *   }
    * }
    *
@@ -869,9 +853,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(String)` - If the XML description is found.
-   * * `Err(napi::Error)` - If there is an error during the lookup.
+   * This function returns:
+   * * `String` - If the XML description is found.
+   * * `null` - If there is an error during the lookup.
    *
    * # Example (in JavaScript)
    *
@@ -879,15 +863,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainXml() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const xml = machine.getXmlDesc(0); // Pass appropriate flags
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const xml = machine.getXmlDesc(0); // Pass appropriate flags
+   *   if (xml) {
    *     console.log('Domain XML:', xml);
-   *   } catch (err) {
-   *     console.error('Error:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error getting domain XML');
    *   }
    * }
    *
@@ -900,9 +882,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(u32)` - If the domain is created successfully, returns the domain ID.
-   * * `Err(napi::Error)` - If there is an error during the creation.
+   * This function returns:
+   * * `u32` - If the domain is created successfully, returns the domain ID.
+   * * `null` - If there is an error during the creation.
    *
    * # Example (in JavaScript)
    *
@@ -910,15 +892,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function createDomain() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const domainId = machine.create();
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const domainId = machine.create();
+   *   if (domainId !== null) {
    *     console.log('Domain created with ID:', domainId);
-   *   } catch (err) {
-   *     console.error('Error creating domain:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error creating domain');
    *   }
    * }
    *
@@ -935,9 +915,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(u32)` - If the domain is created successfully, returns the domain ID.
-   * * `Err(napi::Error)` - If there is an error during the creation.
+   * This function returns:
+   * * `u32` - If the domain is created successfully, returns the domain ID.
+   * * `null` - If there is an error during the creation.
    *
    * # Example (in JavaScript)
    *
@@ -947,15 +927,13 @@ export declare class Machine {
    * const VIR_DOMAIN_START_PAUSED = 1;
    *
    * async function createDomainWithFlags() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = Machine.lookupByName(conn, 'your-domain-name');
-   *     const domainId = machine.createWithFlags(VIR_DOMAIN_START_PAUSED);
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const domainId = machine.createWithFlags(VIR_DOMAIN_START_PAUSED);
+   *   if (domainId !== null) {
    *     console.log('Domain created with ID:', domainId);
-   *   } catch (err) {
-   *     console.error('Error creating domain:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error creating domain');
    *   }
    * }
    *
@@ -968,9 +946,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(MachineInfo)` - If the information is retrieved successfully.
-   * * `Err(napi::Error)` - If there is an error during the retrieval.
+   * This function returns:
+   * * `MachineInfo` - If the information is retrieved successfully.
+   * * `null` - If there is an error during the retrieval.
    *
    * # Example (in JavaScript)
    *
@@ -978,15 +956,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function getDomainInfo() {
-   *   const conn = Connection.open('qemu:///system');
-   *   try {
-   *     const machine = await Machine.lookupByName(conn, 'your-domain-name');
-   *     const info = machine.getInfo();
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const info = machine.getInfo();
+   *   if (info) {
    *     console.log('Domain info:', info);
-   *   } catch (err) {
-   *     console.error('Error:', err);
-   *   } finally {
-   *     conn.close();
+   *   } else {
+   *     console.error('Error getting domain info');
    *   }
    * }
    *
@@ -999,14 +975,15 @@ export declare class Machine {
    *
    * # Arguments
    *
+   * * `conn` - The Connection object to use.
    * * `xml` - The XML description of the domain.
-   * * `flags` - The flags to use for the creation. Use VirDomainCreateFlags enum
+   * * `flags` - The flags to use for the creation. Use VirDomainCreateFlags enum.
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(Machine)` - If the domain is created.
-   * * `Err(napi::Error)` - If there is an error during the creation.
+   * This function returns:
+   * * `Machine` - If the domain is created successfully.
+   * * `null` - If there is an error during the creation.
    *
    * # Example (in JavaScript)
    *
@@ -1014,10 +991,13 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function createDomainFromXml() {
-   *   const conn = Connection.open('quemu:///system');
-   *   const machine = Machine.createXml(conn, 'your-domain-xml', 0);
-   *   // Now, we can power on the domain
-   *   machine.create();
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.createXml(conn, 'your-domain-xml', 0);
+   *   if (machine) {
+   *     console.log('Domain created:', machine);
+   *   } else {
+   *     console.error('Error creating domain from XML');
+   *   }
    * }
    *
    * createDomainFromXml();
@@ -1034,9 +1014,9 @@ export declare class Machine {
    *
    * # Returns
    *
-   * This function returns a `Result` which is:
-   * * `Ok(Machine)` - If the domain is defined successfully.
-   * * `Err(napi::Error)` - If there is an error during the definition.
+   * This function returns:
+   * * `Machine` - If the domain is defined successfully.
+   * * `null` - If there is an error during the definition.
    *
    * # Example (in JavaScript)
    *
@@ -1044,12 +1024,16 @@ export declare class Machine {
    * const { Connection, Machine } = require('your-node-package');
    *
    * async function defineDomainFromXml() {
-   *   const conn = Connection.open('qemu:///system');
-   *   const machine = Machine.defineXml(conn, 'your-domain-xml');
-   *   console.log('Domain defined successfully');
+   *   const conn = await Connection.open('qemu:///system');
+   *   const machine = await Machine.defineXml(conn, 'your-domain-xml');
+   *   if (machine) {
+   *     console.log('Domain defined successfully:', machine);
+   *   } else {
+   *     console.error('Error defining domain from XML');
+   *   }
    * }
    *
-   * defineDomainFromXml().catch(console.error);
+   * defineDomainFromXml();
    * ```
    */
   static defineXml(conn: Connection, xml: string): Machine | null
