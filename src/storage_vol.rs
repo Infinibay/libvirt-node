@@ -1,8 +1,8 @@
-use napi::{Env, JsObject, Property, Result, Error, bindgen_prelude::BigInt};
-use virt::storage_vol::StorageVol as Vol;
-use crate::storage_pool::StoragePool;
 use crate::connection::Connection;
+use crate::storage_pool::StoragePool;
+use napi;
 use serde_json::json;
+use virt::storage_vol::StorageVol as Vol;
 
 #[napi]
 pub struct StorageVol {
@@ -56,10 +56,10 @@ impl StorageVol {
         pool: &StoragePool,
         xml: String,
         flags: u32,
-    ) -> napi::Result<StorageVol> {
+    ) -> Option<StorageVol> {
         match Vol::create_xml(&pool.get(), &xml, flags) {
-            Ok(vol) => Ok(StorageVol { vol }),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(vol) => Some(StorageVol { vol }),
+            Err(_) => None,
         }
     }
 
@@ -108,10 +108,10 @@ impl StorageVol {
         xml: String,
         vol: &StorageVol,
         flags: u32,
-    ) -> napi::Result<StorageVol> {
+    ) -> Option<StorageVol> {
         match Vol::create_xml_from(&pool.get(), &xml, &vol.vol, flags) {
-            Ok(new_vol) => Ok(StorageVol { vol: new_vol }),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(new_vol) => Some(StorageVol { vol: new_vol }),
+            Err(_) => None,
         }
     }
 
@@ -148,10 +148,10 @@ impl StorageVol {
     /// deleteVolume().catch(console.error);
     /// ```
     #[napi]
-    pub fn delete(&self, flags: u32) -> napi::Result<()> {
+    pub fn delete(&self, flags: u32) -> Option<u32> {
         match self.vol.delete(flags) {
-            Ok(_) => Ok(()),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 
@@ -193,7 +193,7 @@ impl StorageVol {
     /// getVolumeInfo().catch(console.error);
     /// ```
     #[napi]
-    pub fn get_info(&self) -> napi::Result<serde_json::Value> {
+    pub fn get_info(&self) -> Option<serde_json::Value> {
         // TODO: Provably we will need to create a struct to match the info returned by libvirt
         // and then convert it to a JsObject
         match self.vol.get_info() {
@@ -203,9 +203,9 @@ impl StorageVol {
                     "capacity": info.capacity.to_string(),
                     "allocation": info.allocation.to_string(),
                 });
-								Ok(value)
+                Some(value)
             },
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Err(_) => None,
         }
     }
 
@@ -234,10 +234,10 @@ impl StorageVol {
     /// getVolumeName().catch(console.error);
     /// ```
     #[napi]
-    pub fn get_name(&self) -> napi::Result<String> {
+    pub fn get_name(&self) -> Option<String> {
         match self.vol.get_name() {
-            Ok(name) => Ok(name),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(name) => Some(name),
+            Err(_) => None,
         }
     }
 
@@ -266,10 +266,10 @@ impl StorageVol {
     /// getVolumePath().catch(console.error);
     /// ```
     #[napi]
-    pub fn get_path(&self) -> napi::Result<String> {
+    pub fn get_path(&self) -> Option<String> {
         match self.vol.get_path() {
-            Ok(path) => Ok(path),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(path) => Some(path),
+            Err(_) => None,
         }
     }
 
@@ -302,10 +302,10 @@ impl StorageVol {
     /// getVolumeXMLDesc().catch(console.error);
     /// ```
     #[napi]
-    pub fn get_xml_desc(&self, flags: u32) -> napi::Result<String> {
+    pub fn get_xml_desc(&self, flags: u32) -> Option<String> {
         match self.vol.get_xml_desc(flags) {
-            Ok(xml) => Ok(xml),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(xml) => Some(xml),
+            Err(_) => None,
         }
     }
 
@@ -341,10 +341,10 @@ impl StorageVol {
     /// resizeVolume().catch(console.error);
     /// ```
     #[napi]
-    pub fn resize(&self, capacity: BigInt, flags: u32) -> napi::Result<()> {
+    pub fn resize(&self, capacity: napi::bindgen_prelude::BigInt, flags: u32) -> Option<u32> {
         match self.vol.resize(capacity.get_u64().1, flags) {
-            Ok(_) => Ok(()),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 
@@ -389,10 +389,10 @@ impl StorageVol {
     /// wipeVolume().catch(console.error);
     /// ```
     #[napi]
-    pub fn wipe(&self, flags: u32) -> napi::Result<()> {
+    pub fn wipe(&self, flags: u32) -> Option<u32> {
         match self.vol.wipe(flags) {
-            Ok(_) => Ok(()),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 
@@ -430,11 +430,10 @@ impl StorageVol {
     /// lookupVolume().catch(console.error);
     /// ```
     #[napi]
-    pub fn lookup_by_name(pool: &StoragePool, name: String) -> napi::Result<Option<StorageVol>> {
+    pub fn lookup_by_name(pool: &StoragePool, name: String) -> Option<StorageVol> {
         match Vol::lookup_by_name(&pool.get(), &name) {
-            Ok(vol) => Ok(Some(StorageVol { vol })),
-            Err(e) if e.code() == virt::error::ErrorNumber::NoStorageVolume => Ok(None),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(vol) => Some(StorageVol { vol }),
+            Err(_) => None,
         }
     }
 
@@ -473,11 +472,10 @@ impl StorageVol {
     /// lookupVolumeByKey().catch(console.error);
     /// ```
     #[napi]
-    pub fn lookup_by_key(conn: &Connection, key: String) -> napi::Result<Option<StorageVol>> {
+    pub fn lookup_by_key(conn: &Connection, key: String) -> Option<StorageVol> {
         match Vol::lookup_by_key(&conn.get_connection(), &key) {
-            Ok(vol) => Ok(Some(StorageVol { vol })),
-            Err(e) if e.code() == virt::error::ErrorNumber::NoStorageVolume => Ok(None),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(vol) => Some(StorageVol { vol }),
+            Err(_) => None,
         }
     }
 
@@ -516,11 +514,10 @@ impl StorageVol {
     /// lookupVolumeByPath().catch(console.error);
     /// ```
     #[napi]
-    pub fn lookup_by_path(conn: &Connection, path: String) -> napi::Result<Option<StorageVol>> {
+    pub fn lookup_by_path(conn: &Connection, path: String) -> Option<StorageVol> {
         match Vol::lookup_by_path(&conn.get_connection(), &path) {
-            Ok(vol) => Ok(Some(StorageVol { vol })),
-            Err(e) if e.code() == virt::error::ErrorNumber::NoStorageVolume => Ok(None),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(vol) => Some(StorageVol { vol }),
+            Err(_) => None,
         }
     }
 
@@ -558,10 +555,10 @@ impl StorageVol {
     ///
     /// Note: After calling this method, the StorageVol object should not be used anymore.
 		#[napi]
-    pub fn free(&mut self) -> napi::Result<()> {
+    pub fn free(&mut self) -> Option<u32> {
         match self.vol.free() {
-            Ok(_) => Ok(()),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(_) => Some(0),
+            Err(_) =>None,
         }
     }
 
@@ -603,10 +600,10 @@ impl StorageVol {
     ///
     /// Note: This operation may take a long time depending on the size of the volume and the chosen algorithm.
 		#[napi]
-    pub fn wipe_pattern(&self, algorithm: u32, flags: u32) -> napi::Result<()> {
+    pub fn wipe_pattern(&self, algorithm: u32, flags: u32) -> Option<u32> {
         match self.vol.wipe_pattern(algorithm, flags) {
-            Ok(_) => Ok(()),
-            Err(e) => Err(Error::from_reason(e.to_string())),
+            Ok(_) => Some(0),
+            Err(_) => None,
         }
     }
 }
