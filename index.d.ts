@@ -109,56 +109,457 @@ export const enum VirStorageXMLFlags {
   /** Inactive */
   VirStorageXMLInactive = 1
 }
-export class Connection {
-  static open(name: string): Connection
-  close(): void
-  isAlive(): boolean
-  getSysInfo(flags: number): string
-  getMaxVcpus(attr: string): number
-  getCpuModelsNames(arch: string, flags: number): Array<string>
-  isEncrypted(): boolean
-  isSecure(): boolean
-  listActiveDomainIds(): Array<number>
-  listInterfaces(): Array<string>
-  listNetworks(): Array<string>
-  listNwFilters(): Array<string>
-  listSecrets(): Array<string>
-  listStoragePools(): Array<string>
-  listAllDomains(flags: number): Array<Machine>
-  listAllNetworks(flags: number): Array<Network>
-  listAllInterfaces(flags: number): Array<Interface>
-  listAllNodeDevices(flags: number): Array<NodeDevice>
-  listAllSecrets(flags: number): Array<Secret>
-  listAllStoragePools(flags: number): Array<StoragePool>
-  listAllNwFilters(flags: number): Array<NWFilter>
-  listDefinedDomains(): Array<string>
-  listDefinedInterfaces(): Array<string>
-  listDefinedStoragePools(): Array<string>
-  listDefinedNetworks(): Array<string>
-  numOfDomains(): number
-  numOfInterfaces(): number
-  numOfNetworks(): number
-  numOfStoragePools(): number
-  numOfNwFilters(): number
-  numOfSecrets(): number
-  numOfNodeDevices(): number
-  numOfDefinedDomains(): number
-  numOfDefinedInterfaces(): number
-  numOfDefinedNetworks(): number
-  getHypVersion(): number
-  compareCpu(xml: string, flags: number): number
-  getFreeMemory(): bigint
-  getNodeInfo(): NodeInfo
-  setKeepAlive(interval: number, count: number): number
-  domainXmlFromNative(nformat: string, nconfig: string, flags: number): string
-  domainXmlToNative(nformat: string, dxml: string, flags: number): string
-  getDomainCapabilities(emulatorbin: string, arch: string, machine: string, virttype: string, flags: number): string
-  getAllDomainStats(stats: number, flags: number): Array<DomainStatsRecord>
-  baselineCpu(xmlcpus: Array<string>, flags: number): string
-  findStoragePoolSources(kind: string, spec: string, flags: number): string
+/**
+ * The level of an error.
+ *
+ * See <https://libvirt.org/html/libvirt-virterror.html#virErrorLevel>
+ */
+export const enum ErrorLevel {
+  /** No error. */
+  None = 0,
+  /** A simple warning. */
+  Warning = 1,
+  /** An error. */
+  Error = 2
+}
+/**
+ * An enumeration of all possible origins of an error.
+ *
+ * See <https://libvirt.org/html/libvirt-virterror.html#virErrorDomain>
+ */
+export const enum ErrorDomain {
+  /** No error. */
+  None = 0,
+  /** Error at Xen hypervisor layer */
+  Xen = 1,
+  /** Error at connection with xend daemon */
+  Xend = 2,
+  /** Error at connection with xen store */
+  XenStore = 3,
+  /** Error in the S-Expression code */
+  SExpr = 4,
+  /** Error in the XML code */
+  Xml = 5,
+  /** Error when operating on a domain */
+  Dom = 6,
+  /** Error in the XML-RPC code */
+  Rpc = 7,
+  /** Error in the proxy code; unused since 0.8.6 */
+  Proxy = 8,
+  /** Error in the configuration file handling */
+  Conf = 9,
+  /** Error at the QEMU daemon */
+  Qemu = 10,
+  /** Error when operating on a network */
+  Net = 11,
+  /** Error from test driver */
+  Test = 12,
+  /** Error from remote driver */
+  Remote = 13,
+  /** Error from OpenVZ driver */
+  OpenVz = 14,
+  /** Error at Xen XM layer */
+  XenXm = 15,
+  /** Error in the Linux Stats code */
+  StatsLinux = 16,
+  /** Error from Linux Container driver */
+  Lxc = 17,
+  /** Error from storage driver */
+  Storage = 18,
+  /** Error from network config */
+  Network = 19,
+  /** Error from domain config */
+  Domain = 20,
+  /** Error at the UML driver; unused since 5.0.0 */
+  Uml = 21,
+  /** Error from node device monitor */
+  Nodedev = 22,
+  /** Error from xen inotify layer */
+  XenINotify = 23,
+  /** Error from security framework */
+  Security = 24,
+  /** Error from VirtualBox driver */
+  VBox = 25,
+  /** Error when operating on an interface */
+  Interface = 26,
+  /** The OpenNebula driver no longer exists. Retained for ABI/API compat only */
+  ONe = 27,
+  /** Error from ESX driver */
+  Esx = 28,
+  /** Error from the phyp driver, unused since 6.0.0 */
+  Phyp = 29,
+  /** Error from secret storage */
+  Secret = 30,
+  /** Error from CPU driver */
+  Cpu = 31,
+  /** Error from XenAPI */
+  XenApi = 32,
+  /** Error from network filter driver */
+  Nwfilter = 33,
+  /** Error from Synchronous hooks */
+  Hook = 34,
+  /** Error from domain snapshot */
+  DomainSnapshot = 35,
+  /** Error from auditing subsystem */
+  Audit = 36,
+  /** Error from sysinfo/SMBIOS */
+  SysInfo = 37,
+  /** Error from I/O streams */
+  Streams = 38,
+  /** Error from VMware driver */
+  Vmware = 39,
+  /** Error from event loop impl */
+  Event = 40,
+  /** Error from libxenlight driver */
+  Libxl = 41,
+  /** Error from lock manager */
+  Locking = 42,
+  /** Error from Hyper-V driver */
+  HyperV = 43,
+  /** Error from capabilities */
+  Capabilities = 44,
+  /** Error from URI handling */
+  Uri = 45,
+  /** Error from auth handling */
+  Auth = 46,
+  /** Error from DBus */
+  Dbus = 47,
+  /** Error from Parallels */
+  Parallels = 48,
+  /** Error from Device */
+  Device = 49,
+  /** Error from libssh2 connection transport */
+  Ssh = 50,
+  /** Error from lockspace */
+  Lockspace = 51,
+  /** Error from initctl device communication */
+  Initctl = 52,
+  /** Error from identity code */
+  Identity = 53,
+  /** Error from cgroups */
+  Cgroup = 54,
+  /** Error from access control manager */
+  Access = 55,
+  /** Error from systemd code */
+  Systemd = 56,
+  /** Error from bhyve driver */
+  Bhyve = 57,
+  /** Error from crypto code */
+  Crypto = 58,
+  /** Error from firewall */
+  Firewall = 59,
+  /** Error from polkit code */
+  Polkit = 60,
+  /** Error from thread utils */
+  Thread = 61,
+  /** Error from admin backend */
+  Admin = 62,
+  /** Error from log manager */
+  Logging = 63,
+  /** Error from Xen xl config code */
+  XenXl = 64,
+  /** Error from perf */
+  Perf = 65,
+  /** Error from libssh connection transport */
+  Libssh = 66,
+  /** Error from resource control */
+  ResCtrl = 67,
+  /** Error from firewalld */
+  Firewalld = 68,
+  /** Error from domain checkpoint */
+  DomainCheckpoint = 69,
+  /** Error from TPM */
+  Tpm = 70,
+  /** Error from BPF code */
+  Bpf = 71,
+  /** Error from Cloud Hypervisor driver */
+  Ch = 72,
+  /** Indicates an error domain not yet supported by the Rust bindings */
+  Last = 73
+}
+/**
+ * An enumeration of all possible errors.
+ *
+ * See <https://libvirt.org/html/libvirt-virterror.html#virErrorNumber>
+ */
+export const enum ErrorNumber {
+  /** No error. */
+  Ok = 0,
+  /** Internal error */
+  InternalError = 1,
+  /** Memory allocation failure */
+  NoMemory = 2,
+  /** No support for this function */
+  NoSupport = 3,
+  /** Could not resolve hostname */
+  UnknownHost = 4,
+  /** Can't connect to hypervisor */
+  NoConnect = 5,
+  /** Invalid connection object */
+  InvalidConn = 6,
+  /** Invalid domain object */
+  InvalidDomain = 7,
+  /** Invalid function argument */
+  InvalidArg = 8,
+  /** A command to hypervisor failed */
+  OperationFailed = 9,
+  /** A HTTP GET command to failed */
+  GetFailed = 10,
+  /** A HTTP POST command to failed */
+  PostFailed = 11,
+  /** Unexpected HTTP error code */
+  HttpError = 12,
+  /** Failure to serialize an S-Expr */
+  SExprSerial = 13,
+  /** Could not open Xen hypervisor control */
+  NoXen = 14,
+  /** Failure doing an hypervisor call */
+  XenCall = 15,
+  /** Unknown OS type */
+  OsType = 16,
+  /** Missing kernel information */
+  NoKernel = 17,
+  /** Missing root device information */
+  NoRoot = 18,
+  /** Missing source device information */
+  NoSource = 19,
+  /** Missing target device information */
+  NoTarget = 20,
+  /** Missing domain name information */
+  NoName = 21,
+  /** Missing domain OS information */
+  NoOs = 22,
+  /** Missing domain devices information */
+  NoDevice = 23,
+  /** Could not open Xen Store control */
+  NoXenStore = 24,
+  /** Too many drivers registered */
+  DriverFull = 25,
+  /** Not supported by the drivers (DEPRECATED) */
+  CallFailed = 26,
+  /** An XML description is not well formed or broken */
+  XmlError = 27,
+  /** The domain already exist */
+  DomExist = 28,
+  /** Operation forbidden on read-only connections */
+  OperationDenied = 29,
+  /** Failed to open a conf file */
+  OpenFailed = 30,
+  /** Failed to read a conf file */
+  ReadFailed = 31,
+  /** Failed to parse a conf file */
+  ParseFailed = 32,
+  /** Failed to parse the syntax of a conf file */
+  ConfSyntax = 33,
+  /** Failed to write a conf file */
+  WriteFailed = 34,
+  /** Detail of an XML error */
+  XmlDetail = 35,
+  /** Invalid network object */
+  InvalidNetwork = 36,
+  /** The network already exist */
+  NetworkExist = 37,
+  /** General system call failure */
+  SystemError = 38,
+  /** Some sort of RPC error */
+  Rpc = 39,
+  /** Error from a GNUTLS call */
+  GnutlsError = 40,
+  /** Failed to start network */
+  NoNetworkStart = 41,
+  /** Domain not found or unexpectedly disappeared */
+  NoDomain = 42,
+  /** Network not found */
+  NoNetwork = 43,
+  /** Invalid MAC address */
+  InvalidMac = 44,
+  /** Authentication failed */
+  AuthFailed = 45,
+  /** Invalid storage pool object */
+  InvalidStoragePool = 46,
+  /** Invalid storage vol object */
+  InvalidStorageVol = 47,
+  /** Failed to start storage */
+  NoStorage = 48,
+  /** Storage pool not found */
+  NoStoragePool = 49,
+  /** Storage volume not found */
+  NoStorageVolume = 50,
+  /** Failed to start node driver */
+  NoNode = 51,
+  /** Invalid node device object */
+  InvalidNodeDevice = 52,
+  /** Node device not found */
+  NoNodeDevice = 53,
+  /** Security model not found */
+  NoSecurityModel = 54,
+  /** Operation is not applicable at this time */
+  OperationInvalid = 55,
+  /** Failed to start interface driver */
+  NoInterfaceStart = 56,
+  /** Interface driver not running */
+  NoInterface = 57,
+  /** Invalid interface object */
+  InvalidInterface = 58,
+  /** More than one matching interface found */
+  MultipleInterfaces = 59,
+  /** Failed to start nwfilter driver */
+  NoNwfilterStart = 60,
+  /** Invalid nwfilter object */
+  InvalidNwfilter = 61,
+  /** Nw filter pool not found */
+  NoNwfilter = 62,
+  /** Failed to build firewall */
+  BuildFirewall = 63,
+  /** Failed to start secret storage */
+  NoSecretStart = 64,
+  /** Invalid secret */
+  InvalidSecret = 65,
+  /** Secret not found */
+  NoSecret = 66,
+  /** Unsupported configuration construct */
+  ConfigUnsupported = 67,
+  /** Timeout occurred during operation */
+  OperationTimeout = 68,
+  /** A migration worked, but making the VM persist on the dest host failed */
+  MigratePersistFailed = 69,
+  /** A synchronous hook script failed */
+  HookScriptFailed = 70,
+  /** Invalid domain snapshot */
+  InvalidDomainSnapshot = 71,
+  /** Domain snapshot not found */
+  NoDomainSnapshot = 72,
+  /** Stream pointer not valid */
+  InvalidStream = 73,
+  /** Valid API use but unsupported by the given driver */
+  ArgumentUnsupported = 74,
+  /** Storage pool probe failed */
+  StorageProbeFailed = 75,
+  /** Storage pool already built */
+  StoragePoolBuilt = 76,
+  /** Force was not requested for a risky domain snapshot revert */
+  SnapshotRevertRisky = 77,
+  /** Operation on a domain was canceled/aborted by user */
+  OperationAborted = 78,
+  /** Authentication cancelled */
+  AuthCancelled = 79,
+  /** The metadata is not present */
+  NoDomainMetadata = 80,
+  /** Migration is not safe */
+  MigrateUnsafe = 81,
+  /** Integer overflow */
+  Overflow = 82,
+  /** Action prevented by block copy job */
+  BlockCopyActive = 83,
+  /** The requested operation is not supported */
+  OperationUnsupported = 84,
+  /** Error in ssh transport driver */
+  Ssh = 85,
+  /** Guest agent is unresponsive, not running or not usable */
+  AgentUnresponsive = 86,
+  /** Resource is already in use */
+  ResourceBusy = 87,
+  /** Operation on the object/resource was denied */
+  AccessDenied = 88,
+  /** Error from a dbus service */
+  DbusService = 89,
+  /** The storage vol already exists */
+  StorageVolExist = 90,
+  /** Given CPU is incompatible with host CPU */
+  CpuIncompatible = 91,
+  /** XML document doesn't validate against schema */
+  XmlInvalidSchema = 92,
+  /** Finish API succeeded but it is expected to return NULL */
+  MigrateFinishOk = 93,
+  /** Authentication unavailable */
+  AuthUnavailable = 94,
+  /** Server was not found */
+  NoServer = 95,
+  /** Client was not found */
+  NoClient = 96,
+  /** Guest agent replies with wrong id to guest-sync command (DEPRECATED) */
+  AgentUnsynced = 97,
+  /** Error in libssh transport driver */
+  Libssh = 98,
+  /** Fail to find the desired device */
+  DeviceMissing = 99,
+  /** Invalid nwfilter binding */
+  InvalidNwfilterBinding = 100,
+  /** No nwfilter binding */
+  NoNwfilterBinding = 101,
+  /** Invalid domain checkpoint */
+  InvalidDomainCheckpoint = 102,
+  /** Domain checkpoint not found */
+  NoDomainCheckpoint = 103,
+  /** Domain backup job id not found */
+  NoDomainBackup = 104,
+  /** Invalid network port object */
+  InvalidNetworkPort = 105,
+  /** The network port already exist */
+  NetworkPortExists = 106,
+  /** Network port not found */
+  NoNetworkPort = 107,
+  /** No domain's hostname found */
+  NoHostname = 108,
+  /** Checkpoint can't be used */
+  CheckpointInconsistent = 109,
+  /** More than one matching domain found */
+  MultipleDomains = 110,
+  /** Network metadata is not present */
+  NoNetworkMetadata = 111,
+  /** Indicates an error number not yet supported by the Rust bindings */
+  Last = 112
+}
+export declare class Connection {
+  static open(name: string): Connection | null
+  close(): number
+  isAlive(): boolean | null
+  getSysInfo(flags: number): string | null
+  getMaxVcpus(attr: string): number | null
+  getCpuModelsNames(arch: string, flags: number): Array<string> | null
+  isEncrypted(): boolean | null
+  isSecure(): boolean | null
+  listActiveDomainIds(): Array<number> | null
+  listInterfaces(): Array<string> | null
+  listNetworks(): Array<string> | null
+  listNwFilters(): Array<string> | null
+  listSecrets(): Array<string> | null
+  listStoragePools(): Array<string> | null
+  listAllDomains(flags: number): Array<Machine> | null
+  listAllNetworks(flags: number): Array<Network> | null
+  listAllInterfaces(flags: number): Array<Interface> | null
+  listAllNodeDevices(flags: number): Array<NodeDevice> | null
+  listAllSecrets(flags: number): Array<Secret> | null
+  listAllStoragePools(flags: number): Array<StoragePool> | null
+  listAllNwFilters(flags: number): Array<NWFilter> | null
+  listDefinedDomains(): Array<string> | null
+  listDefinedInterfaces(): Array<string> | null
+  listDefinedStoragePools(): Array<string> | null
+  listDefinedNetworks(): Array<string> | null
+  numOfDomains(): number | null
+  numOfInterfaces(): number | null
+  numOfNetworks(): number | null
+  numOfStoragePools(): number | null
+  numOfNwFilters(): number | null
+  numOfSecrets(): number | null
+  numOfNodeDevices(): number | null
+  numOfDefinedDomains(): number | null
+  numOfDefinedInterfaces(): number | null
+  numOfDefinedNetworks(): number | null
+  getHypVersion(): number | null
+  compareCpu(xml: string, flags: number): number | null
+  getFreeMemory(): bigint | null
+  getNodeInfo(): NodeInfo | null
+  setKeepAlive(interval: number, count: number): number | null
+  domainXmlFromNative(nformat: string, nconfig: string, flags: number): string | null
+  domainXmlToNative(nformat: string, dxml: string, flags: number): string | null
+  getDomainCapabilities(emulatorbin: string, arch: string, machine: string, virttype: string, flags: number): string | null
+  getAllDomainStats(stats: number, flags: number): Array<DomainStatsRecord> | null
+  baselineCpu(xmlcpus: Array<string>, flags: number): string | null
+  findStoragePoolSources(kind: string, spec: string, flags: number): string | null
 }
 /** Represents a virtual machine. */
-export class Machine {
+export declare class Machine {
   /**
    * Looks up a domain by its name.
    *
@@ -945,7 +1346,7 @@ export class Machine {
   setNumaParameters(params: NumaParameters, flags: number): number
 }
 /** Contains information about a virtual machine. */
-export class MachineInfo {
+export declare class MachineInfo {
   /** The running state, one of virDomainState. */
   state: number
   /** The maximum memory in KBytes allowed. */
@@ -958,7 +1359,7 @@ export class MachineInfo {
   cpuTime: bigint
 }
 /** Represents the time structure. */
-export class Time {
+export declare class Time {
   /** The seconds part of the time. */
   seconds: number
   /** The nanoseconds part of the time. */
@@ -968,14 +1369,14 @@ export class Time {
  * Represents the state result.
  * Check https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainState
  */
-export class StateResult {
+export declare class StateResult {
   /** The result of the state. 0 if success, 1 if failure. */
   result: number
   /** The reason of the state. It's a flag, Check libvirt documentation for more info. */
   reason: number
 }
 /** Represents the block info. */
-export class BlockInfo {
+export declare class BlockInfo {
   /**
    * Logical size in bytes of the image (how much storage the guest
    * will see).
@@ -992,7 +1393,7 @@ export class BlockInfo {
    */
   physical: bigint
 }
-export class InterfaceStats {
+export declare class InterfaceStats {
   rxBytes: number
   rxPackets: number
   rxErrs: number
@@ -1002,12 +1403,12 @@ export class InterfaceStats {
   txErrs: number
   txDrop: number
 }
-export class MemoryStat {
+export declare class MemoryStat {
   tag: number
   val: bigint
 }
 export type NUMAParameters = NumaParameters
-export class NumaParameters {
+export declare class NumaParameters {
   /** Lists the numa nodeset of a domain. */
   nodeSet?: string
   /**
@@ -1016,7 +1417,7 @@ export class NumaParameters {
    */
   mode?: number
 }
-export class MemoryParameters {
+export declare class MemoryParameters {
   /** Represents the maximum memory the guest can use. */
   hardLimit?: bigint
   /**
@@ -1032,7 +1433,7 @@ export class MemoryParameters {
   /** Represents the maximum swap plus memory the guest can use. */
   swapHardLimit?: bigint
 }
-export class Network {
+export declare class Network {
   static lookupByName(conn: Connection, name: string): Network
   static lookupByUuidString(conn: Connection, uuid: string): Network
   getName(): string
@@ -1051,10 +1452,10 @@ export class Network {
   setAutostart(autostart: boolean): number
   update(cmd: number, section: number, index: number, xml: string, flags: number): void
 }
-export class Interface { }
-export class NodeDevice { }
-export class Secret { }
-export class StoragePool {
+export declare class Interface { }
+export declare class NodeDevice { }
+export declare class Secret { }
+export declare class StoragePool {
   static defineXml(conn: Connection, xml: string): StoragePool
   static createXml(conn: Connection, xml: string, flags: number): StoragePool
   static lookupByName(conn: Connection, name: string): StoragePool
@@ -1076,7 +1477,7 @@ export class StoragePool {
   setAutostart(autostart: boolean): void
   getInfo(): any
 }
-export class StorageVol {
+export declare class StorageVol {
   /**
    * Creates a new storage volume in the given storage pool.
    *
@@ -1570,6 +1971,9 @@ export class StorageVol {
   wipePattern(algorithm: number, flags: number): void
 }
 export type NWFilter = NwFilter
-export class NwFilter { }
-export class NodeInfo { }
-export class DomainStatsRecord { }
+export declare class NwFilter { }
+export declare class NodeInfo { }
+export declare class DomainStatsRecord { }
+export declare class Error {
+  static lastError(): Error
+}

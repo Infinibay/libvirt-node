@@ -310,7 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, StorageVol, NwFilter, NodeInfo, DomainStatsRecord, VirDomainGetHostnameFlags, VirDomainXMLFlags, VirDomainCreateFlags, VirDomainDefineFlags, VirDomainDestroyFlags, VirDomainRebootFlag, VirDomainUndefineFlags, VirDomainModificationImpact, VirDomainMemoryModFlags, VirStoragePoolCreateFlags, VirStorageXMLFlags } = nativeBinding
+const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, StorageVol, NwFilter, NodeInfo, DomainStatsRecord, VirDomainGetHostnameFlags, VirDomainXMLFlags, VirDomainCreateFlags, VirDomainDefineFlags, VirDomainDestroyFlags, VirDomainRebootFlag, VirDomainUndefineFlags, VirDomainModificationImpact, VirDomainMemoryModFlags, VirStoragePoolCreateFlags, VirStorageXMLFlags, ErrorLevel, ErrorDomain, ErrorNumber, Error } = nativeBinding
 
 module.exports.Connection = Connection
 module.exports.Machine = Machine
@@ -342,3 +342,7 @@ module.exports.VirDomainModificationImpact = VirDomainModificationImpact
 module.exports.VirDomainMemoryModFlags = VirDomainMemoryModFlags
 module.exports.VirStoragePoolCreateFlags = VirStoragePoolCreateFlags
 module.exports.VirStorageXMLFlags = VirStorageXMLFlags
+module.exports.ErrorLevel = ErrorLevel
+module.exports.ErrorDomain = ErrorDomain
+module.exports.ErrorNumber = ErrorNumber
+module.exports.Error = Error
