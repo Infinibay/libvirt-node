@@ -1434,23 +1434,23 @@ export declare class MemoryParameters {
   swapHardLimit?: bigint
 }
 export declare class Network {
-  static lookupByName(conn: Connection, name: string): Network
-  static lookupByUuidString(conn: Connection, uuid: string): Network
-  getName(): string
-  getUuidString(): string
-  getBridgeName(): string
-  getXmlDesc(flags: number): string
-  create(): number
-  static defineXml(conn: Connection, xml: string): Network
-  static createXml(conn: Connection, xml: string): Network
-  destroy(): void
-  undefine(): void
-  free(): void
-  isActive(): boolean
-  isPersistent(): boolean
-  getAutostart(): boolean
-  setAutostart(autostart: boolean): number
-  update(cmd: number, section: number, index: number, xml: string, flags: number): void
+  static lookupByName(conn: Connection, name: string): Network | null
+  static lookupByUuidString(conn: Connection, uuid: string): Network | null
+  getName(): string | null
+  getUuidString(): string | null
+  getBridgeName(): string | null
+  getXmlDesc(flags: number): string | null
+  create(): number | null
+  static defineXml(conn: Connection, xml: string): Network | null
+  static createXml(conn: Connection, xml: string): Network | null
+  destroy(): number | null
+  undefine(): number | null
+  free(): number | null
+  isActive(): boolean | null
+  isPersistent(): boolean | null
+  getAutostart(): boolean | null
+  setAutostart(autostart: boolean): number | null
+  update(cmd: number, section: number, index: number, xml: string, flags: number): number | null
 }
 export declare class Interface { }
 export declare class NodeDevice { }
