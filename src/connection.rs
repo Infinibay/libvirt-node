@@ -14,7 +14,7 @@ pub struct Connection {
 impl Clone for Connection {
   fn clone(&self) -> Self {
     let uri = self.con.get_uri().expect("Failed to get URI for cloning");
-    let new_connection = Connect::open(&uri).expect("Failed to clone connection");
+    let new_connection = Connect::open(Some(&uri)).expect("Failed to clone connection");
     Connection {
       con: new_connection,
     }
@@ -29,7 +29,7 @@ impl Connection {
 
   #[napi]
   pub fn open(name: String) -> Option<Connection> {
-    let con = Connect::open(&name);
+    let con = Connect::open(Some(&name));
     match con {
       Ok(connection) => Some(Self { con: connection }),
       Err(_) => None,
@@ -63,7 +63,7 @@ impl Connection {
 
   #[napi]
   pub fn get_max_vcpus(&self, attr: String) -> Option<u32> {
-    match self.con.get_max_vcpus(&attr) {
+    match self.con.get_max_vcpus(Some(&attr)) {
       Ok(vcpus) => Some(vcpus),
       Err(_) => None,
     }
@@ -465,7 +465,7 @@ impl Connection {
     virttype: String,
     flags: u32,
   ) -> Option<String> {
-    match self.con.get_domain_capabilities(&emulatorbin, &arch, &machine, &virttype, flags) {
+    match self.con.get_domain_capabilities(Some(&emulatorbin), Some(&arch), Some(&machine), Some(&virttype), flags) {
       Ok(xml) => Some(xml),
       Err(_) => None,
     }
@@ -509,7 +509,7 @@ impl Connection {
     spec: String,
     flags: u32,
   ) -> Option<String> {
-    match self.con.find_storage_pool_sources(&kind, &spec, flags) {
+    match self.con.find_storage_pool_sources(&kind, Some(&spec), flags) {
       Ok(xml) => Some(xml),
       Err(_) => None,
     }

@@ -1131,7 +1131,7 @@ impl Machine {
 
   #[napi]
   pub fn domain_restore_flags(conn: &Connection, path: String, flags: u32) -> Option<u32> {
-    match  Domain::domain_restore_flags(conn.get_connection(), &path, flags) {
+    match Domain::domain_restore_flags(conn.get_connection(), &path, None, flags) {
       Ok(_) => Some(0),
       Err(_) => None,
     }
@@ -1461,17 +1461,17 @@ impl Machine {
     uri: String,
     flags: u32,
   ) -> Option<u32> {
-    match self.domain.set_metadata(kind, &metadata, &key, &uri, flags) {
+    match self.domain.set_metadata(kind, Some(&metadata), Some(&key), Some(&uri), flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
   #[napi]
   pub fn get_metadata(&self, kind: i32, uri: String, flags: u32) -> Option<String> {
-    match self.domain.get_metadata(kind, &uri, flags) {
+    match self.domain.get_metadata(kind, Some(&uri), flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1534,9 +1534,9 @@ impl Machine {
     if !lossless {
       return None;
     }
-    match self.domain.migrate(dconn.get_connection(), flags, &uri, bandwidth_u64) {
+    match self.domain.migrate(dconn.get_connection(), flags, Some(&uri), None, bandwidth_u64) {
       Ok(result) => Some(Machine::from_domain(result, &dconn)),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1557,9 +1557,9 @@ impl Machine {
     if !lossless {
       return None;
     }
-    match self.domain.migrate2(dconn.get_connection(), &dxml, flags, &uri, bandwidth_u64) {
+    match self.domain.migrate2(dconn.get_connection(), Some(&dxml), flags, Some(&uri), None, bandwidth_u64) {
       Ok(result) => Some(Machine::from_domain(result, &dconn)),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1572,9 +1572,9 @@ impl Machine {
     if !lossless {
       return None;
     }
-    match self.domain.migrate_to_uri(&uri, flags, bandwidth_u64) {
+    match self.domain.migrate_to_uri(&uri, flags, None, bandwidth_u64) {
       Ok(_) => Some(0),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1595,9 +1595,9 @@ impl Machine {
     if !lossless {
       return None;
     }
-    match self.domain.migrate_to_uri2(&dconn_uri, &mig_uri, &dxml, flags, bandwidth_u64) {
+    match self.domain.migrate_to_uri2(Some(&dconn_uri), Some(&mig_uri), Some(&dxml), flags, None, bandwidth_u64) {
       Ok(_) => Some(0),
-      Err(err) =>None,
+      Err(_) => None,
     }
   }
 
@@ -1606,9 +1606,9 @@ impl Machine {
     match self.domain.get_numa_parameters(flags) {
       Ok(result) => Some(NUMAParameters {
         node_set: result.node_set.map(|v| v.to_string()),
-        mode: result.mode.map(|v| v.into()),
+        mode: result.mode.map(|v| v as u32),
       }),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1616,11 +1616,11 @@ impl Machine {
   pub fn set_numa_parameters(&self, params: crate::machine::NUMAParameters, flags: u32) -> Option<u32> {
     let params: virt::domain::NUMAParameters = virt::domain::NUMAParameters {
       node_set: params.node_set.map(|v| v.to_string()),
-      mode: params.mode.map(|v| v.into()),
+      mode: params.mode.map(|v| v as i32),
     };
     match self.domain.set_numa_parameters(params, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 }
