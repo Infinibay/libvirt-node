@@ -1611,4 +1611,20 @@ impl Machine {
       Err(_) => None,
     }
   }
+
+  #[napi]
+  pub fn qemu_agent_command(&self, cmd: String, timeout: i32, flags: u32) -> Option<String> {
+    match self.domain.qemu_agent_command(&cmd, timeout, flags) {
+      Ok(result) => Some(result),
+      Err(_) => None,
+    }
+  }
+
+  #[napi]
+  pub fn qemu_monitor_command(&self, cmd: String, flags: u32) -> Option<String> {
+    match self.domain.qemu_monitor_command(&cmd, flags) {
+      Ok(result) => Some(result),
+      Err(_) => None,
+    }
+  }
 }

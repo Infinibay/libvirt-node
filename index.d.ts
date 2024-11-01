@@ -1328,6 +1328,8 @@ export declare class Machine {
   migrateToUriWithXml(dconnUri: string, migUri: string, dxml: string, flags: number, bandwidth: bigint): number | null
   getNumaParameters(flags: number): NumaParameters | null
   setNumaParameters(params: NumaParameters, flags: number): number | null
+  qemuAgentCommand(cmd: string, timeout: number, flags: number): string | null
+  qemuMonitorCommand(cmd: string, flags: number): string | null
 }
 /** Contains information about a virtual machine. */
 export declare class MachineInfo {
