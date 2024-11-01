@@ -1,7 +1,4 @@
-use napi::{
-  bindgen_prelude::{FromNapiValue, ToNapiValue},
-  NapiRaw,
-};
+use napi;
 use virt::{connect::Connect};
 
 use crate::machine::Machine;

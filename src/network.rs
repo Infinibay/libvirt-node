@@ -70,7 +70,7 @@ impl Network {
   #[napi]
   pub fn create(&self) -> Option<u32> {
     match self.network.create() {
-      Ok(ret) => Some(ret),
+      Ok(_ret) => Some(0),
       Err(_) => None,
     }
   }
@@ -94,7 +94,7 @@ impl Network {
   #[napi]
   pub fn destroy(&self) -> Option<u32> {
     match self.network.destroy() {
-      Ok(ret) => Some(0),
+      Ok(_ret) => Some(0),
       Err(_) => None,
     }
   }
@@ -102,7 +102,7 @@ impl Network {
   #[napi]
   pub fn undefine(&self) -> Option<u32> {
     match self.network.undefine() {
-      Ok(ret) => Some(0),
+      Ok(_ret) => Some(0),
       Err(_) => None,
     }
   }
@@ -110,7 +110,7 @@ impl Network {
   #[napi]
   pub fn free(&mut self) -> Option<u32> {
     match self.network.free() {
-      Ok(ret) => Some(0),
+      Ok(_ret) => Some(0),
       Err(_) => None,
     }
   }
@@ -150,7 +150,7 @@ impl Network {
   #[napi]
   pub fn update(&self, cmd: u32, section: u32, index: i32, xml: String, flags: u32) -> Option<u32> {
     match self.network.update(cmd, section, index, &xml, flags) {
-      Ok(ret) => Some(0),
+      Ok(_ret) => Some(0),
       Err(_) => None,
     }
   }

@@ -1,9 +1,5 @@
-use napi::{CallContext, Env, JsObject, JsString, JsUndefined, Property, Result as NapiResult};
+use napi;
 use virt;
-
-use napi_derive::js_function;
-
-use crate::connection::Connection;
 
 #[napi]
 pub struct NWFilter {

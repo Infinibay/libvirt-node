@@ -180,7 +180,7 @@ impl Machine {
         domain,
         con: con.clone(),
       }),
-      Err(err) => None
+      Err(_) => None
     }
   }
 
@@ -224,7 +224,7 @@ impl Machine {
         domain,
         con: conn.clone(),
       }),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -271,7 +271,7 @@ impl Machine {
         domain,
         con: conn.clone(),
       }),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -454,7 +454,7 @@ impl Machine {
     let uuid_result = self.domain.get_uuid_string();
     match uuid_result {
       Ok(uuid) =>Some(uuid),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -637,7 +637,7 @@ impl Machine {
         nr_virt_cpu: info.nr_virt_cpu,
         cpu_time: info.cpu_time.into(),
       }),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1051,7 +1051,7 @@ impl Machine {
     let result = self.domain.set_max_memory(memory_u64);
     match result {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1065,14 +1065,14 @@ impl Machine {
 
   #[napi]
   pub fn set_memory(&self, memory: BigInt) -> Option<bool> {
-    let (signed, memory_u64, lossless) = memory.get_u64();
+    let (_signed, memory_u64, lossless) = memory.get_u64();
     if !lossless {
       return None;
     }
     let result = self.domain.set_memory(memory_u64);
     match result {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1089,7 +1089,7 @@ impl Machine {
     let result = self.domain.set_memory_flags(memory_u64, flags as u32);
     match result {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1131,7 +1131,7 @@ impl Machine {
 
   #[napi]
   pub fn domain_restore_flags(conn: &Connection, path: String, flags: u32) -> Option<u32> {
-    match Domain::domain_restore_flags(conn.get_connection(), &path, None, flags) {
+    match  Domain::domain_restore_flags(conn.get_connection(), &path, None, flags) {
       Ok(_) => Some(0),
       Err(_) => None,
     }
@@ -1154,7 +1154,7 @@ impl Machine {
     let result = self.domain.migrate_set_max_speed(bandwidth_u64, flags);
     match result {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1168,14 +1168,14 @@ impl Machine {
 
   #[napi]
   pub fn migrate_set_compression_cache(&self, size: BigInt, flags: u32) -> Option<u32> {
-    let (signed, size_u64, lossless) = size.get_u64();
+    let (_signed, size_u64, lossless) = size.get_u64();
     if !lossless {
       return None;
     }
     let result = self.domain.migrate_set_compression_cache(size_u64, flags);
     match result {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1189,14 +1189,14 @@ impl Machine {
 
   #[napi]
   pub fn migrate_set_max_downtime(&self, downtime: BigInt, flags: u32) -> Option<u32> {
-    let (signed, downtime_u64, lossless) = downtime.get_u64();
+    let (_signed, downtime_u64, lossless) = downtime.get_u64();
     if !lossless {
       return None;
     }
     let result = self.domain.migrate_set_max_downtime(downtime_u64, flags);
     match result {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1215,7 +1215,7 @@ impl Machine {
         seconds: result.0,
         nseconds: result.1,
       }),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1227,7 +1227,7 @@ impl Machine {
         allocation: result.allocation.into(),
         physical: result.physical.into(),
       }),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1273,14 +1273,14 @@ impl Machine {
 
   #[napi]
   pub fn set_block_threshold(&self, dev: String, threshold: BigInt, flags: u32) -> Option<u32> {
-    let (signed, threshold_u64, lossless) = threshold.get_u64();
-    if (!lossless) {
+    let (_signed, threshold_u64, lossless) = threshold.get_u64();
+    if !lossless {
       return None;
     }
     let result = self.domain.set_block_threshold(&dev, threshold_u64, flags);
     match result {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1326,7 +1326,7 @@ impl Machine {
         tx_errs: stats.tx_errs,
         tx_drop: stats.tx_drop,
       }),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1343,7 +1343,7 @@ impl Machine {
         }
         Some(memory_stats)
       },
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1355,7 +1355,7 @@ impl Machine {
   ) -> Option<String> {
     match Domain::save_image_get_xml_desc(conn.get_connection(), &file, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1368,7 +1368,7 @@ impl Machine {
   ) -> Option<u32> {
     match Domain::save_image_define_xml(conn.get_connection(), &file, &dxml, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1376,7 +1376,7 @@ impl Machine {
   pub fn attach_device(&self, xml: String) -> Option<u32> {
     match self.domain.attach_device(&xml) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1384,7 +1384,7 @@ impl Machine {
   pub fn attach_device_flags(&self, xml: String, flags: u32) -> Option<u32> {
     match self.domain.attach_device_flags(&xml, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1392,7 +1392,7 @@ impl Machine {
   pub fn detach_device(&self, xml: String) -> Option<u32> {
     match self.domain.detach_device(&xml) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1400,7 +1400,7 @@ impl Machine {
   pub fn detach_device_flags(&self, xml: String, flags: u32) -> Option<u32> {
     match self.domain.detach_device_flags(&xml, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1408,7 +1408,7 @@ impl Machine {
   pub fn update_device_flags(&self, xml: String, flags: u32) -> Option<u32> {
     match self.domain.update_device_flags(&xml, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1416,7 +1416,7 @@ impl Machine {
   pub fn managed_save(&self, flags: u32) -> Option<u32> {
     match self.domain.managed_save(flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1424,7 +1424,7 @@ impl Machine {
   pub fn has_managed_save(&self, flags: u32) -> Option<bool> {
     match self.domain.has_managed_save(flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1432,7 +1432,7 @@ impl Machine {
   pub fn managed_save_remove(&self, flags: u32) -> Option<u32> {
     match self.domain.managed_save_remove(flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1440,7 +1440,7 @@ impl Machine {
   pub fn core_dump(&self, to: String, flags: u32) -> Option<u32> {
     match self.domain.core_dump(&to, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1448,7 +1448,7 @@ impl Machine {
   pub fn core_dump_with_format(&self, to: String, format: u32, flags: u32) -> Option<u32> {
     match self.domain.core_dump_with_format(&to, format, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1477,13 +1477,13 @@ impl Machine {
 
   #[napi]
   pub fn block_resize(&self, disk: String, size: BigInt, flags: u32) -> Option<u32> {
-    let (signed, size_u64, lossless) = size.get_u64();
-    if (!lossless) {
+    let (_signed, size_u64, lossless) = size.get_u64();
+    if !lossless {
       return None;
     }
     match self.domain.block_resize(&disk, size_u64, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1496,7 +1496,7 @@ impl Machine {
         min_guarantee: result.min_guarantee.map(|v| BigInt::from(v)),
         swap_hard_limit: result.swap_hard_limit.map(|v| BigInt::from(v)),
       }),
-      Err(err) => None,
+      Err(_) => None,
     }
  }
 
@@ -1515,7 +1515,7 @@ impl Machine {
     };
     match self.domain.set_memory_parameters(mem_param, flags) {
       Ok(result) => Some(result),
-      Err(err) => None,
+      Err(_) => None,
     }
   }
 
@@ -1527,14 +1527,11 @@ impl Machine {
     uri: String,
     bandwidth: BigInt,
   ) -> Option<Machine> {
-    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
-    if signed {
-      return None;
-    }
+    let (_signed, bandwidth_u64, lossless) = bandwidth.get_u64();
     if !lossless {
       return None;
     }
-    match self.domain.migrate(dconn.get_connection(), flags, Some(&uri), None, bandwidth_u64) {
+    match self.domain.migrate(dconn.get_connection(), flags, None, Some(&uri), bandwidth_u64) {
       Ok(result) => Some(Machine::from_domain(result, &dconn)),
       Err(_) => None,
     }
@@ -1550,14 +1547,11 @@ impl Machine {
     uri: String,
     bandwidth: BigInt,
   ) -> Option<Machine> {
-    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
-    if signed {
-      return None;
-    }
+    let (_signed, bandwidth_u64, lossless) = bandwidth.get_u64();
     if !lossless {
       return None;
     }
-    match self.domain.migrate2(dconn.get_connection(), Some(&dxml), flags, Some(&uri), None, bandwidth_u64) {
+    match self.domain.migrate2(dconn.get_connection(), Some(&dxml), flags, None, Some(&uri), bandwidth_u64) {
       Ok(result) => Some(Machine::from_domain(result, &dconn)),
       Err(_) => None,
     }
@@ -1565,14 +1559,11 @@ impl Machine {
 
   #[napi]
   pub fn migrate_to_uri(&self, uri: String, flags: u32, bandwidth: BigInt) -> Option<u32> {
-    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
-    if signed {
-      return None;
-    }
+    let (_signed, bandwidth_u64, lossless) = bandwidth.get_u64();
     if !lossless {
       return None;
     }
-    match self.domain.migrate_to_uri(&uri, flags, None, bandwidth_u64) {
+    match self.domain.migrate_to_uri(&uri, flags, Some(""), bandwidth_u64) {
       Ok(_) => Some(0),
       Err(_) => None,
     }
@@ -1588,16 +1579,13 @@ impl Machine {
     flags: u32,
     bandwidth: BigInt,
   ) -> Option<u32> {
-    let (signed, bandwidth_u64, lossless) = bandwidth.get_u64();
-    if signed {
-      return None;
-    }
+    let (_signed, bandwidth_u64, lossless) = bandwidth.get_u64();
     if !lossless {
       return None;
     }
     match self.domain.migrate_to_uri2(Some(&dconn_uri), Some(&mig_uri), Some(&dxml), flags, None, bandwidth_u64) {
       Ok(_) => Some(0),
-      Err(_) => None,
+      Err(_) =>None,
     }
   }
 

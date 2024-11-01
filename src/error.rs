@@ -1,8 +1,6 @@
-use napi::{
-  bindgen_prelude::*,
-};
+use napi;
 
-use virt;
+// ...existing code...
 
 /// The level of an error.
 ///

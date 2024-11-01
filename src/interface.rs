@@ -1,14 +1,5 @@
-use napi::{
-  CallContext, Env, JsBoolean, JsObject, JsString, JsUndefined, Property, Result as NapiResult,
-};
-
+use napi;
 use virt;
-
-// Add them when we need them
-// use log::{error, info, warn};
-use napi_derive::js_function;
-
-use crate::connection::Connection;
 
 #[napi]
 pub struct Interface {
