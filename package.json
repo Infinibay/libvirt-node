@@ -16,6 +16,7 @@
     "node-addon-api"
   ],
   "files": [
+    "*.node",
     "index.d.ts",
     "index.js"
   ],
