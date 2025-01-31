@@ -62,7 +62,9 @@ switch (platform) {
   case 'win32':
     switch (arch) {
       case 'x64':
-        localFileExisted = existsSync(join(__dirname, 'libvirt.win32-x64-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.win32-x64-msvc.node')
+        )
         try {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.win32-x64-msvc.node')
@@ -74,7 +76,9 @@ switch (platform) {
         }
         break
       case 'ia32':
-        localFileExisted = existsSync(join(__dirname, 'libvirt.win32-ia32-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.win32-ia32-msvc.node')
+        )
         try {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.win32-ia32-msvc.node')
@@ -86,7 +90,9 @@ switch (platform) {
         }
         break
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'libvirt.win32-arm64-msvc.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.win32-arm64-msvc.node')
+        )
         try {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.win32-arm64-msvc.node')
@@ -125,7 +131,9 @@ switch (platform) {
         }
         break
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'libvirt.darwin-arm64.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.darwin-arm64.node')
+        )
         try {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.darwin-arm64.node')
@@ -159,7 +167,9 @@ switch (platform) {
     switch (arch) {
       case 'x64':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'libvirt.linux-x64-musl.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-x64-musl.node')
+          )
           try {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-x64-musl.node')
@@ -170,7 +180,9 @@ switch (platform) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'libvirt.linux-x64-gnu.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-x64-gnu.node')
+          )
           try {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-x64-gnu.node')
@@ -184,7 +196,9 @@ switch (platform) {
         break
       case 'arm64':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'libvirt.linux-arm64-musl.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-arm64-musl.node')
+          )
           try {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-arm64-musl.node')
@@ -195,7 +209,9 @@ switch (platform) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'libvirt.linux-arm64-gnu.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-arm64-gnu.node')
+          )
           try {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-arm64-gnu.node')
@@ -209,7 +225,9 @@ switch (platform) {
         break
       case 'arm':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'libvirt.linux-arm-musleabihf.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-arm-musleabihf.node')
+          )
           try {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-arm-musleabihf.node')
@@ -220,7 +238,9 @@ switch (platform) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'libvirt.linux-arm-gnueabihf.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-arm-gnueabihf.node')
+          )
           try {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-arm-gnueabihf.node')
@@ -234,7 +254,9 @@ switch (platform) {
         break
       case 'riscv64':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'libvirt.linux-riscv64-musl.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-riscv64-musl.node')
+          )
           try {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-riscv64-musl.node')
@@ -245,7 +267,9 @@ switch (platform) {
             loadError = e
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'libvirt.linux-riscv64-gnu.node'))
+          localFileExisted = existsSync(
+            join(__dirname, 'libvirt.linux-riscv64-gnu.node')
+          )
           try {
             if (localFileExisted) {
               nativeBinding = require('./libvirt.linux-riscv64-gnu.node')
@@ -258,7 +282,9 @@ switch (platform) {
         }
         break
       case 's390x':
-        localFileExisted = existsSync(join(__dirname, 'libvirt.linux-s390x-gnu.node'))
+        localFileExisted = existsSync(
+          join(__dirname, 'libvirt.linux-s390x-gnu.node')
+        )
         try {
           if (localFileExisted) {
             nativeBinding = require('./libvirt.linux-s390x-gnu.node')
@@ -284,42 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const {
-  Connection,
-  Machine,
-  MachineInfo,
-  Time,
-  StateResult,
-  BlockInfo,
-  InterfaceStats,
-  MemoryStat,
-  NumaParameters,
-  MemoryParameters,
-  Network,
-  Interface,
-  NodeDevice,
-  Secret,
-  StoragePool,
-  StorageVol,
-  NwFilter,
-  NodeInfo,
-  DomainStatsRecord,
-  VirDomainGetHostnameFlags,
-  VirDomainXMLFlags,
-  VirDomainCreateFlags,
-  VirDomainDefineFlags,
-  VirDomainDestroyFlags,
-  VirDomainRebootFlag,
-  VirDomainUndefineFlags,
-  VirDomainModificationImpact,
-  VirDomainMemoryModFlags,
-  VirStoragePoolCreateFlags,
-  VirStorageXMLFlags,
-  ErrorLevel,
-  ErrorDomain,
-  ErrorNumber,
-  Error,
-} = nativeBinding
+const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, StorageVol, NwFilter, NodeInfo, DomainStatsRecord, VirDomainGetHostnameFlags, VirDomainXMLFlags, VirDomainCreateFlags, VirDomainDefineFlags, VirDomainDestroyFlags, VirDomainRebootFlag, VirDomainUndefineFlags, VirDomainModificationImpact, VirDomainMemoryModFlags, VirStoragePoolCreateFlags, VirStorageXMLFlags, ErrorLevel, ErrorDomain, ErrorNumber, Error } = nativeBinding
 
 module.exports.Connection = Connection
 module.exports.Machine = Machine

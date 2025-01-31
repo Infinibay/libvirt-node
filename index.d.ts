@@ -7,7 +7,7 @@ export const enum VirDomainGetHostnameFlags {
   /** Parse DHCP lease file */
   VirDomainGetHostnameLease = 1,
   /** Query qemu guest agent */
-  VirDomainGetHostnameAgent = 2,
+  VirDomainGetHostnameAgent = 2
 }
 export const enum VirDomainXMLFlags {
   /** dump security sensitive information too */
@@ -17,7 +17,7 @@ export const enum VirDomainXMLFlags {
   /** update guest CPU requirements according to host CPU */
   VirDomainXMLUpdateCPU = 4,
   /** dump XML suitable for migration */
-  VirDomainXMLMigratable = 8,
+  VirDomainXMLMigratable = 8
 }
 export const enum VirDomainCreateFlags {
   /** Default behavior */
@@ -33,11 +33,11 @@ export const enum VirDomainCreateFlags {
   /** Validate the XML document against schema */
   VirDomainStartValidate = 16,
   /** Re-initialize NVRAM from template */
-  VirDomainStartResetNvram = 32,
+  VirDomainStartResetNvram = 32
 }
 export const enum VirDomainDefineFlags {
   /** Validate the XML document against schema */
-  VirDomainDefineValidate = 1,
+  VirDomainDefineValidate = 1
 }
 export const enum VirDomainDestroyFlags {
   /** Default behavior - could lead to data loss!! */
@@ -45,7 +45,7 @@ export const enum VirDomainDestroyFlags {
   /** Only SIGTERM, no SIGKILL */
   VirDomainDestroyGraceful = 1,
   /** Remove VM logs on destroy */
-  VirDomainDestroyRemoveLogs = 2,
+  VirDomainDestroyRemoveLogs = 2
 }
 export const enum VirDomainRebootFlag {
   /** Hypervisor choice */
@@ -59,7 +59,7 @@ export const enum VirDomainRebootFlag {
   /** Send a signal */
   VirDomainRebootSignal = 8,
   /** Use paravirt guest control */
-  VirDomainRebootParavirt = 16,
+  VirDomainRebootParavirt = 16
 }
 export const enum VirDomainUndefineFlags {
   /** Also remove any managed save */
@@ -75,7 +75,7 @@ export const enum VirDomainUndefineFlags {
   /** Also remove any TPM state */
   VirDomainUndefineTpm = 32,
   /** Keep TPM state */
-  VirDomainUndefineKeepTpm = 64,
+  VirDomainUndefineKeepTpm = 64
 }
 export const enum VirDomainModificationImpact {
   /** Affect current domain state */
@@ -83,7 +83,7 @@ export const enum VirDomainModificationImpact {
   /** Affect running domain state */
   VirDomainAffectLive = 1,
   /** Affect persistent domain state */
-  VirDomainAffectConfig = 2,
+  VirDomainAffectConfig = 2
 }
 export const enum VirDomainMemoryModFlags {
   /** See virDomainModificationImpact */
@@ -93,7 +93,7 @@ export const enum VirDomainMemoryModFlags {
   /** See virDomainModificationImpact */
   VirDomainMemLive = 1,
   /** Affect Max rather than current */
-  VirDomainMemMaximum = 4,
+  VirDomainMemMaximum = 4
 }
 export const enum VirStoragePoolCreateFlags {
   /** Default behavior */
@@ -103,11 +103,11 @@ export const enum VirStoragePoolCreateFlags {
   /** Create pool from XML, build it and overwrite if exists */
   VirStoragePoolCreateWithBuildOverwrite = 2,
   /** Create pool from XML, build it and do not overwrite if exists */
-  VirStoragePoolCreateWithBuildNoOverwrite = 4,
+  VirStoragePoolCreateWithBuildNoOverwrite = 4
 }
 export const enum VirStorageXMLFlags {
   /** Inactive */
-  VirStorageXMLInactive = 1,
+  VirStorageXMLInactive = 1
 }
 /**
  * The level of an error.
@@ -120,7 +120,7 @@ export const enum ErrorLevel {
   /** A simple warning. */
   Warning = 1,
   /** An error. */
-  Error = 2,
+  Error = 2
 }
 /**
  * An enumeration of all possible origins of an error.
@@ -275,7 +275,7 @@ export const enum ErrorDomain {
   /** Error from Cloud Hypervisor driver */
   Ch = 72,
   /** Indicates an error domain not yet supported by the Rust bindings */
-  Last = 73,
+  Last = 73
 }
 /**
  * An enumeration of all possible errors.
@@ -508,7 +508,7 @@ export const enum ErrorNumber {
   /** Network metadata is not present */
   NoNetworkMetadata = 111,
   /** Indicates an error number not yet supported by the Rust bindings */
-  Last = 112,
+  Last = 112
 }
 export class Connection {
   static open(name: string): Connection | null
@@ -553,13 +553,7 @@ export class Connection {
   setKeepAlive(interval: number, count: number): number | null
   domainXmlFromNative(nformat: string, nconfig: string, flags: number): string | null
   domainXmlToNative(nformat: string, dxml: string, flags: number): string | null
-  getDomainCapabilities(
-    emulatorbin: string,
-    arch: string,
-    machine: string,
-    virttype: string,
-    flags: number,
-  ): string | null
+  getDomainCapabilities(emulatorbin: string, arch: string, machine: string, virttype: string, flags: number): string | null
   getAllDomainStats(stats: number, flags: number): Array<DomainStatsRecord> | null
   baselineCpu(xmlcpus: Array<string>, flags: number): string | null
   findStoragePoolSources(kind: string, spec: string, flags: number): string | null
@@ -1444,9 +1438,9 @@ export class Network {
   setAutostart(autostart: boolean): number | null
   update(cmd: number, section: number, index: number, xml: string, flags: number): number | null
 }
-export class Interface {}
-export class NodeDevice {}
-export class Secret {}
+export class Interface { }
+export class NodeDevice { }
+export class Secret { }
 export class StoragePool {
   static defineXml(conn: Connection, xml: string): StoragePool | null
   static createXml(conn: Connection, xml: string, flags: number): StoragePool | null
@@ -1963,9 +1957,17 @@ export class StorageVol {
   wipePattern(algorithm: number, flags: number): number | null
 }
 export type NWFilter = NwFilter
-export class NwFilter {}
-export class NodeInfo {}
-export class DomainStatsRecord {}
+export class NwFilter {
+  static lookupByName(conn: Connection, name: string): NwFilter | null
+  static lookupByUuidString(conn: Connection, uuid: string): NwFilter | null
+  getName(): string | null
+  getUuidString(): string | null
+  getXmlDesc(flags: number): string | null
+  static defineXml(conn: Connection, xml: string): NwFilter | null
+  undefine(): number | null
+}
+export class NodeInfo { }
+export class DomainStatsRecord { }
 export class Error {
   code: number
   domain: number
