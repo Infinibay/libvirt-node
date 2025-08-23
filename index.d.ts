@@ -1330,6 +1330,199 @@ export class Machine {
   setNumaParameters(params: NumaParameters, flags: number): number | null
   qemuAgentCommand(cmd: string, timeout: number, flags: number): string | null
   qemuMonitorCommand(cmd: string, flags: number): string | null
+  /**
+   * Create a snapshot of the domain.
+   *
+   * # Arguments
+   *
+   * * `xml` - The XML description of the snapshot.
+   * * `flags` - The flags to use for the creation. Use VirDomainSnapshotCreateFlags enum.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Snapshot` - If the snapshot is created successfully.
+   * * `null` - If there is an error during the creation.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function createSnapshot() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const xml = `
+   *     <domainsnapshot>
+   *       <name>snapshot1</name>
+   *       <description>My first snapshot</description>
+   *     </domainsnapshot>
+   *   `;
+   *   const snapshot = await machine.snapshotCreateXml(xml, 0);
+   *   if (snapshot) {
+   *     console.log('Snapshot created successfully');
+   *   }
+   * }
+   *
+   * createSnapshot();
+   * ```
+   */
+  snapshotCreateXml(xml: string, flags: number): Snapshot | null
+  /**
+   * List all snapshots of the domain.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the listing. Use VirDomainSnapshotListFlags enum.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Vec<Snapshot>` - A list of snapshots.
+   * * `null` - If there is an error during the listing.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function listSnapshots() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const snapshots = await machine.listAllSnapshots(0);
+   *   if (snapshots) {
+   *     console.log(`Found ${snapshots.length} snapshots`);
+   *     snapshots.forEach(snapshot => {
+   *       console.log('Snapshot name:', snapshot.getName());
+   *     });
+   *   }
+   * }
+   *
+   * listSnapshots();
+   * ```
+   */
+  listAllSnapshots(flags: number): Array<Snapshot> | null
+  /**
+   * Lookup a snapshot by name.
+   *
+   * # Arguments
+   *
+   * * `name` - The name of the snapshot.
+   * * `flags` - The flags to use for the lookup.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Snapshot` - If the snapshot is found.
+   * * `null` - If the snapshot is not found or there is an error.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function findSnapshot() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const snapshot = await machine.snapshotLookupByName('snapshot1', 0);
+   *   if (snapshot) {
+   *     console.log('Snapshot found');
+   *   }
+   * }
+   *
+   * findSnapshot();
+   * ```
+   */
+  snapshotLookupByName(name: string, flags: number): Snapshot | null
+  /**
+   * Revert the domain to a snapshot.
+   *
+   * # Arguments
+   *
+   * * `snapshot` - The snapshot to revert to.
+   * * `flags` - The flags to use for the revert. Use VirDomainSnapshotRevertFlags enum.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `true` - If the domain is reverted successfully.
+   * * `false` - If there is an error during the revert.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function revertToSnapshot() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const snapshot = await machine.snapshotLookupByName('snapshot1', 0);
+   *   if (snapshot) {
+   *     const success = await machine.revertToSnapshot(snapshot, 0);
+   *     if (success) {
+   *       console.log('Domain reverted to snapshot');
+   *     }
+   *   }
+   * }
+   *
+   * revertToSnapshot();
+   * ```
+   */
+  revertToSnapshot(snapshot: Snapshot, flags: number): boolean
+  /**
+   * Get the current snapshot of the domain.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the lookup.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Snapshot` - The current snapshot.
+   * * `null` - If there is no current snapshot or an error occurred.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function getCurrentSnapshot() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const snapshot = await machine.snapshotCurrent(0);
+   *   if (snapshot) {
+   *     console.log('Current snapshot:', snapshot.getName());
+   *   }
+   * }
+   *
+   * getCurrentSnapshot();
+   * ```
+   */
+  snapshotCurrent(flags: number): Snapshot | null
+  /**
+   * Check if the domain has a current snapshot.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the check.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Boolean` - true if the domain has a current snapshot, false otherwise.
+   * * `null` - If there is an error during the check.
+   */
+  hasCurrentSnapshot(flags: number): boolean | null
+  /**
+   * Get the number of snapshots for the domain.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for counting.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Number` - The number of snapshots.
+   * * `null` - If there is an error.
+   */
+  numOfSnapshots(flags: number): number | null
 }
 /** Contains information about a virtual machine. */
 export class MachineInfo {
@@ -1974,4 +2167,441 @@ export class Error {
   message: string
   level: number
   static lastError(): Error
+}
+/** Represents a domain snapshot. */
+export class Snapshot {
+  /**
+   * Get the name of the snapshot.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `String` - If the name is found.
+   * * `null` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function getSnapshotName() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const snapshots = await machine.listAllSnapshots(0);
+   *   if (snapshots && snapshots.length > 0) {
+   *     const name = snapshots[0].getName();
+   *     console.log('Snapshot name:', name);
+   *   }
+   * }
+   *
+   * getSnapshotName();
+   * ```
+   */
+  getName(): string | null
+  /**
+   * Get the XML description of the snapshot.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the lookup.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `String` - If the XML description is found.
+   * * `null` - If there is an error during the lookup.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function getSnapshotXml() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const snapshot = await machine.snapshotLookupByName('snapshot-name', 0);
+   *   if (snapshot) {
+   *     const xml = snapshot.getXmlDesc(0);
+   *     console.log('Snapshot XML:', xml);
+   *   }
+   * }
+   *
+   * getSnapshotXml();
+   * ```
+   */
+  getXmlDesc(flags: number): string | null
+  /**
+   * Delete the snapshot.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the deletion. Use VirDomainSnapshotDeleteFlags enum.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `true` - If the snapshot is deleted successfully.
+   * * `false` - If there is an error during the deletion.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function deleteSnapshot() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const snapshot = await machine.snapshotLookupByName('snapshot-name', 0);
+   *   if (snapshot) {
+   *     const success = await snapshot.delete(0);
+   *     if (success) {
+   *       console.log('Snapshot deleted successfully');
+   *     }
+   *   }
+   * }
+   *
+   * deleteSnapshot();
+   * ```
+   */
+  delete(flags: number): boolean
+  /**
+   * Check if this snapshot is the current snapshot.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the check.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Boolean` - true if this is the current snapshot, false otherwise.
+   * * `null` - If there is an error during the check.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine } = require('libvirt-node');
+   *
+   * async function checkCurrentSnapshot() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const snapshot = await machine.snapshotLookupByName('snapshot-name', 0);
+   *   if (snapshot) {
+   *     const isCurrent = snapshot.isCurrent(0);
+   *     console.log('Is current snapshot:', isCurrent);
+   *   }
+   * }
+   *
+   * checkCurrentSnapshot();
+   * ```
+   */
+  isCurrent(flags: number): boolean | null
+  /**
+   * Check if the snapshot has metadata.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the check.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Boolean` - true if the snapshot has metadata, false otherwise.
+   * * `null` - If there is an error during the check.
+   */
+  hasMetadata(flags: number): boolean | null
+  /**
+   * Get the parent snapshot of this snapshot.
+   *
+   * # Arguments
+   *
+   * * `flags` - The flags to use for the lookup.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `Snapshot` - The parent snapshot.
+   * * `null` - If there is no parent or an error occurred.
+   */
+  getParent(flags: number): Snapshot | null
+  /**
+   * Free the snapshot object.
+   *
+   * # Returns
+   *
+   * This function returns:
+   * * `true` - If the snapshot is freed successfully.
+   * * `false` - If there is an error during the operation.
+   */
+  free(): boolean
+}
+/** Information about a snapshot */
+export class SnapshotInfo {
+  /** Name of the snapshot */
+  name: string
+  /** Description of the snapshot */
+  description?: string
+  /** Creation time (seconds since epoch) */
+  creationTime: number
+  /** Current snapshot flag */
+  isCurrent: boolean
+  /** Has metadata flag */
+  hasMetadata: boolean
+}
+/**
+ * High-level wrapper for QEMU Guest Agent commands.
+ * Provides convenient methods for common guest operations.
+ */
+export class GuestAgent {
+  /**
+   * Create a new GuestAgent wrapper for a machine.
+   *
+   * # Arguments
+   *
+   * * `machine` - The Machine instance to wrap.
+   *
+   * # Returns
+   *
+   * A new GuestAgent instance.
+   */
+  constructor(machine: Machine)
+  /**
+   * Execute a command in the guest.
+   *
+   * # Arguments
+   *
+   * * `cmd` - The command to execute.
+   * * `args` - Optional array of arguments.
+   * * `capture_output` - Whether to capture stdout/stderr.
+   *
+   * # Returns
+   *
+   * ExecResult with command execution details, or null on error.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine, GuestAgent } = require('libvirt-node');
+   *
+   * async function executeCommand() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const agent = new GuestAgent(machine);
+   *
+   *   // Windows example
+   *   const result = await agent.exec('powershell.exe', ['-Command', 'Get-Service'], true);
+   *   if (result) {
+   *     console.log('Output:', result.stdout);
+   *   }
+   *
+   *   // Linux example
+   *   const result = await agent.exec('/bin/systemctl', ['status', 'nginx'], true);
+   *   if (result) {
+   *     console.log('Output:', result.stdout);
+   *   }
+   * }
+   *
+   * executeCommand();
+   * ```
+   */
+  exec(cmd: string, args?: Array<string> | undefined | null, captureOutput?: boolean | undefined | null): ExecResult | null
+  /**
+   * Check the status of a running command.
+   *
+   * # Arguments
+   *
+   * * `pid` - The process ID returned by exec().
+   *
+   * # Returns
+   *
+   * ExecStatus with command status, or null on error.
+   */
+  execStatus(pid: number): ExecStatus | null
+  /**
+   * Read a file from the guest.
+   *
+   * # Arguments
+   *
+   * * `path` - The path to the file in the guest.
+   *
+   * # Returns
+   *
+   * The file contents as a string, or null on error.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine, GuestAgent } = require('libvirt-node');
+   *
+   * async function readGuestFile() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const agent = new GuestAgent(machine);
+   *
+   *   // Read a configuration file
+   *   const content = await agent.fileRead('/etc/nginx/nginx.conf');
+   *   if (content) {
+   *     console.log('File content:', content);
+   *   }
+   * }
+   *
+   * readGuestFile();
+   * ```
+   */
+  fileRead(path: string): string | null
+  /**
+   * Write content to a file in the guest.
+   *
+   * # Arguments
+   *
+   * * `path` - The path to the file in the guest.
+   * * `content` - The content to write.
+   * * `append` - Whether to append to the file (default: false, overwrites).
+   *
+   * # Returns
+   *
+   * true if successful, false otherwise.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine, GuestAgent } = require('libvirt-node');
+   *
+   * async function writeGuestFile() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const agent = new GuestAgent(machine);
+   *
+   *   // Write a configuration file
+   *   const success = await agent.fileWrite(
+   *     '/tmp/config.json',
+   *     JSON.stringify({ key: 'value' }),
+   *     false
+   *   );
+   *
+   *   if (success) {
+   *     console.log('File written successfully');
+   *   }
+   * }
+   *
+   * writeGuestFile();
+   * ```
+   */
+  fileWrite(path: string, content: string, append?: boolean | undefined | null): boolean
+  /**
+   * Get network interfaces information from the guest.
+   *
+   * # Returns
+   *
+   * JSON string with network interfaces information, or null on error.
+   */
+  getNetworkInterfaces(): string | null
+  /**
+   * Get the guest OS information.
+   *
+   * # Returns
+   *
+   * JSON string with OS information, or null on error.
+   */
+  getOsInfo(): string | null
+  /**
+   * Shutdown the guest OS.
+   *
+   * # Arguments
+   *
+   * * `mode` - Optional shutdown mode: "powerdown", "reboot", "halt" (default: "powerdown").
+   *
+   * # Returns
+   *
+   * true if command was sent successfully, false otherwise.
+   */
+  shutdown(mode?: string | undefined | null): boolean
+  /**
+   * Sync/flush guest filesystems.
+   *
+   * # Returns
+   *
+   * true if successful, false otherwise.
+   */
+  sync(): boolean
+  /**
+   * Set the guest time.
+   *
+   * # Arguments
+   *
+   * * `time` - Optional time in nanoseconds since epoch. If not provided, uses host time.
+   *
+   * # Returns
+   *
+   * true if successful, false otherwise.
+   */
+  setTime(time?: number | undefined | null): boolean
+  /**
+   * Get list of users currently logged into the guest.
+   *
+   * # Returns
+   *
+   * JSON string with user list, or null on error.
+   */
+  getUsers(): string | null
+  /**
+   * Execute a raw QEMU Guest Agent command.
+   *
+   * # Arguments
+   *
+   * * `command` - The QGA command name.
+   * * `arguments` - Optional JSON string with command arguments.
+   *
+   * # Returns
+   *
+   * The raw JSON response string, or null on error.
+   *
+   * # Example (in JavaScript)
+   *
+   * ```javascript
+   * const { Machine, GuestAgent } = require('libvirt-node');
+   *
+   * async function rawCommand() {
+   *   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+   *   const agent = new GuestAgent(machine);
+   *
+   *   // Get memory blocks information
+   *   const result = await agent.rawCommand('guest-get-memory-blocks', null);
+   *   if (result) {
+   *     console.log('Memory blocks:', result);
+   *   }
+   * }
+   *
+   * rawCommand();
+   * ```
+   */
+  rawCommand(command: string, arguments?: string | undefined | null): string | null
+}
+/** Result of executing a command in the guest. */
+export class ExecResult {
+  /** Process ID of the executed command */
+  pid: number
+  /** Exit code (if command has finished) */
+  exitcode?: number
+  /** Standard output */
+  stdout?: string
+  /** Standard error */
+  stderr?: string
+  /** Whether the command has exited */
+  exited: boolean
+}
+/** Status of a running command. */
+export class ExecStatus {
+  /** Whether the command has exited */
+  exited: boolean
+  /** Exit code (if exited) */
+  exitcode?: number
+  /** Signal that terminated the process (if any) */
+  signal?: number
+  /** Standard output data (base64 encoded) */
+  outData?: string
+  /** Standard error data (base64 encoded) */
+  errData?: string
+}
+/** Guest file information. */
+export class GuestFileInfo {
+  /** File handle */
+  handle: number
+  /** Whether operation was successful */
+  success: boolean
+  /** Error message if operation failed */
+  error?: string
 }

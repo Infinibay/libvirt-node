@@ -310,7 +310,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, StorageVol, NwFilter, NodeInfo, DomainStatsRecord, VirDomainGetHostnameFlags, VirDomainXMLFlags, VirDomainCreateFlags, VirDomainDefineFlags, VirDomainDestroyFlags, VirDomainRebootFlag, VirDomainUndefineFlags, VirDomainModificationImpact, VirDomainMemoryModFlags, VirStoragePoolCreateFlags, VirStorageXMLFlags, ErrorLevel, ErrorDomain, ErrorNumber, Error } = nativeBinding
+const { Connection, Machine, MachineInfo, Time, StateResult, BlockInfo, InterfaceStats, MemoryStat, NumaParameters, MemoryParameters, Network, Interface, NodeDevice, Secret, StoragePool, StorageVol, NwFilter, NodeInfo, DomainStatsRecord, VirDomainGetHostnameFlags, VirDomainXMLFlags, VirDomainCreateFlags, VirDomainDefineFlags, VirDomainDestroyFlags, VirDomainRebootFlag, VirDomainUndefineFlags, VirDomainModificationImpact, VirDomainMemoryModFlags, VirStoragePoolCreateFlags, VirStorageXMLFlags, ErrorLevel, ErrorDomain, ErrorNumber, Error, Snapshot, SnapshotInfo, GuestAgent, ExecResult, ExecStatus, GuestFileInfo } = nativeBinding
 
 module.exports.Connection = Connection
 module.exports.Machine = Machine
@@ -346,3 +346,9 @@ module.exports.ErrorLevel = ErrorLevel
 module.exports.ErrorDomain = ErrorDomain
 module.exports.ErrorNumber = ErrorNumber
 module.exports.Error = Error
+module.exports.Snapshot = Snapshot
+module.exports.SnapshotInfo = SnapshotInfo
+module.exports.GuestAgent = GuestAgent
+module.exports.ExecResult = ExecResult
+module.exports.ExecStatus = ExecStatus
+module.exports.GuestFileInfo = GuestFileInfo
