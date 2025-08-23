@@ -10,6 +10,7 @@ use crate::connection::Connection;
 
 /// Represents a virtual machine.
 #[napi]
+#[derive(Clone)]
 pub struct Machine {
   domain: Domain,
   con: Connection,
@@ -1624,6 +1625,243 @@ impl Machine {
   pub fn qemu_monitor_command(&self, cmd: String, flags: u32) -> Option<String> {
     match self.domain.qemu_monitor_command(&cmd, flags) {
       Ok(result) => Some(result),
+      Err(_) => None,
+    }
+  }
+
+  // ===== Snapshot Operations =====
+
+  /// Create a snapshot of the domain.
+  ///
+  /// # Arguments
+  ///
+  /// * `xml` - The XML description of the snapshot.
+  /// * `flags` - The flags to use for the creation. Use VirDomainSnapshotCreateFlags enum.
+  ///
+  /// # Returns
+  ///
+  /// This function returns:
+  /// * `Snapshot` - If the snapshot is created successfully.
+  /// * `null` - If there is an error during the creation.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Machine } = require('libvirt-node');
+  ///
+  /// async function createSnapshot() {
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   const xml = `
+  ///     <domainsnapshot>
+  ///       <name>snapshot1</name>
+  ///       <description>My first snapshot</description>
+  ///     </domainsnapshot>
+  ///   `;
+  ///   const snapshot = await machine.snapshotCreateXml(xml, 0);
+  ///   if (snapshot) {
+  ///     console.log('Snapshot created successfully');
+  ///   }
+  /// }
+  ///
+  /// createSnapshot();
+  /// ```
+  #[napi]
+  pub fn snapshot_create_xml(&self, xml: String, flags: u32) -> Option<crate::snapshot::Snapshot> {
+    match virt::domain_snapshot::DomainSnapshot::create_xml(&self.domain, &xml, flags) {
+      Ok(snapshot) => Some(crate::snapshot::Snapshot::from_domain_snapshot(snapshot)),
+      Err(_) => None,
+    }
+  }
+
+  /// List all snapshots of the domain.
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the listing. Use VirDomainSnapshotListFlags enum.
+  ///
+  /// # Returns
+  ///
+  /// This function returns:
+  /// * `Vec<Snapshot>` - A list of snapshots.
+  /// * `null` - If there is an error during the listing.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Machine } = require('libvirt-node');
+  ///
+  /// async function listSnapshots() {
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   const snapshots = await machine.listAllSnapshots(0);
+  ///   if (snapshots) {
+  ///     console.log(`Found ${snapshots.length} snapshots`);
+  ///     snapshots.forEach(snapshot => {
+  ///       console.log('Snapshot name:', snapshot.getName());
+  ///     });
+  ///   }
+  /// }
+  ///
+  /// listSnapshots();
+  /// ```
+  #[napi]
+  pub fn list_all_snapshots(&self, flags: u32) -> Option<Vec<crate::snapshot::Snapshot>> {
+    match self.domain.list_all_snapshots(flags) {
+      Ok(snapshots) => {
+        let mut result = Vec::new();
+        for snapshot in snapshots {
+          result.push(crate::snapshot::Snapshot::from_domain_snapshot(snapshot));
+        }
+        Some(result)
+      },
+      Err(_) => None,
+    }
+  }
+
+  /// Lookup a snapshot by name.
+  ///
+  /// # Arguments
+  ///
+  /// * `name` - The name of the snapshot.
+  /// * `flags` - The flags to use for the lookup.
+  ///
+  /// # Returns
+  ///
+  /// This function returns:
+  /// * `Snapshot` - If the snapshot is found.
+  /// * `null` - If the snapshot is not found or there is an error.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Machine } = require('libvirt-node');
+  ///
+  /// async function findSnapshot() {
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   const snapshot = await machine.snapshotLookupByName('snapshot1', 0);
+  ///   if (snapshot) {
+  ///     console.log('Snapshot found');
+  ///   }
+  /// }
+  ///
+  /// findSnapshot();
+  /// ```
+  #[napi]
+  pub fn snapshot_lookup_by_name(&self, name: String, flags: u32) -> Option<crate::snapshot::Snapshot> {
+    match virt::domain_snapshot::DomainSnapshot::lookup_by_name(&self.domain, &name, flags) {
+      Ok(snapshot) => Some(crate::snapshot::Snapshot::from_domain_snapshot(snapshot)),
+      Err(_) => None,
+    }
+  }
+
+  /// Revert the domain to a snapshot.
+  ///
+  /// # Arguments
+  ///
+  /// * `snapshot` - The snapshot to revert to.
+  /// * `flags` - The flags to use for the revert. Use VirDomainSnapshotRevertFlags enum.
+  ///
+  /// # Returns
+  ///
+  /// This function returns:
+  /// * `true` - If the domain is reverted successfully.
+  /// * `false` - If there is an error during the revert.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Machine } = require('libvirt-node');
+  ///
+  /// async function revertToSnapshot() {
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   const snapshot = await machine.snapshotLookupByName('snapshot1', 0);
+  ///   if (snapshot) {
+  ///     const success = await machine.revertToSnapshot(snapshot, 0);
+  ///     if (success) {
+  ///       console.log('Domain reverted to snapshot');
+  ///     }
+  ///   }
+  /// }
+  ///
+  /// revertToSnapshot();
+  /// ```
+  #[napi]
+  pub fn revert_to_snapshot(&self, snapshot: &crate::snapshot::Snapshot, flags: u32) -> bool {
+    match snapshot.snapshot.revert(flags) {
+      Ok(_) => true,
+      Err(_) => false,
+    }
+  }
+
+  /// Get the current snapshot of the domain.
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the lookup.
+  ///
+  /// # Returns
+  ///
+  /// This function returns:
+  /// * `Snapshot` - The current snapshot.
+  /// * `null` - If there is no current snapshot or an error occurred.
+  ///
+  /// # Example (in JavaScript)
+  ///
+  /// ```javascript
+  /// const { Machine } = require('libvirt-node');
+  ///
+  /// async function getCurrentSnapshot() {
+  ///   const machine = await Machine.lookupByName(conn, 'your-domain-name');
+  ///   const snapshot = await machine.snapshotCurrent(0);
+  ///   if (snapshot) {
+  ///     console.log('Current snapshot:', snapshot.getName());
+  ///   }
+  /// }
+  ///
+  /// getCurrentSnapshot();
+  /// ```
+  #[napi]
+  pub fn snapshot_current(&self, flags: u32) -> Option<crate::snapshot::Snapshot> {
+    match virt::domain_snapshot::DomainSnapshot::current(&self.domain, flags) {
+      Ok(snapshot) => Some(crate::snapshot::Snapshot::from_domain_snapshot(snapshot)),
+      Err(_) => None,
+    }
+  }
+
+  /// Check if the domain has a current snapshot.
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for the check.
+  ///
+  /// # Returns
+  ///
+  /// This function returns:
+  /// * `Boolean` - true if the domain has a current snapshot, false otherwise.
+  /// * `null` - If there is an error during the check.
+  #[napi]
+  pub fn has_current_snapshot(&self, flags: u32) -> Option<bool> {
+    // Try to get current snapshot, if it exists return true
+    match virt::domain_snapshot::DomainSnapshot::current(&self.domain, flags) {
+      Ok(_) => Some(true),
+      Err(_) => Some(false),
+    }
+  }
+
+  /// Get the number of snapshots for the domain.
+  ///
+  /// # Arguments
+  ///
+  /// * `flags` - The flags to use for counting.
+  ///
+  /// # Returns
+  ///
+  /// This function returns:
+  /// * `Number` - The number of snapshots.
+  /// * `null` - If there is an error.
+  #[napi]
+  pub fn num_of_snapshots(&self, flags: u32) -> Option<u32> {
+    match virt::domain_snapshot::DomainSnapshot::num(&self.domain, flags) {
+      Ok(num) => Some(num),
       Err(_) => None,
     }
   }

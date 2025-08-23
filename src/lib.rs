@@ -14,3 +14,5 @@ mod node_info;
 mod domain_stats_record;
 mod enums;
 mod error;
+mod snapshot;
+mod guest_agent;
