@@ -2,11 +2,11 @@ import b from 'benny'
 
 import { plus100 } from '..'
 
-function add(a: number) {
+function add (a: number) {
   return a + 100
 }
 
-async function run() {
+async function run () {
   await b.suite(
     'Add 100',
 
@@ -19,7 +19,7 @@ async function run() {
     }),
 
     b.cycle(),
-    b.complete(),
+    b.complete()
   )
 }
 
